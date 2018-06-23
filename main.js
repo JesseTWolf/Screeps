@@ -11,12 +11,30 @@ module.exports.loop = function () {
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
     // console.log('Harvesters: ' + harvesters.length);
 
-      if(harvesters.length < 2 && Game.rooms[name].energyAvailable >= 200) {
-            var newName = 'Harvester' + Game.time;
-            console.log('Spawning new harvester: ' + newName);
-            Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,
-                {memory: {role: 'harvester'}});
+      if(harvesters.length < 2) {
+        if(Game.rooms[name].energyAvailable >= 200) {
+          var newName = 'Harvester' + Game.time;
+          console.log('Spawning new harvester: ' + newName);
+          Game.spawns['Home'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE, MOVE, MOVE], newName,
+              {memory: {role: 'harvester'}});
         }
+        if(Game.rooms[name].energyAvailable <200) {
+          var newName = 'Harvester' + Game.time;
+          console.log('Spawning new harvester: ' + newName);
+          Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,
+          {memory: {role: 'harvester'}});
+        }
+      }
+        //  if(harvesters.length < 2) {
+        //   if(Game.rooms[name].energyAvailable >400) {
+
+        //   else {
+        //     var newName = 'Harvester' + Game.time;
+        //     console.log('Spawning new harvester: ' + newName);
+        //     Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,
+        //         {memory: {role: 'harvester'}});
+        //   }
+
 
         if(Game.spawns['Home'].spawning) {
             var spawningCreep = Game.creeps[Game.spawns['Home'].spawning.name];
@@ -41,7 +59,7 @@ module.exports.loop = function () {
 
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
 
-    if(builders.length < 4 && Game.rooms[name].energyAvailable >= 200) {
+    if(builders.length < 2 && Game.rooms[name].energyAvailable >= 200) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
         Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,

@@ -1,105 +1,104 @@
 var roleHarvester = require('roleHarvester');
 var roleUpgrader = require('roleUpgrader');
 var roleBuilder = require('roleBuilder');
+var utilities = require('utilities');
+var boxKicker = require('roleBoxKicker');
+var miner = require('miner');
 
 module.exports.loop = function () {
+    
+    //Make sure to have minimum of 8 harvesters, 1 upgrader, 1 builder, and 10 boxKickers.
+    var minimimumNumberOfHarvesters = 4;
+    var minimimumNumberOfUpgraders = 4;
+    var minimimumNumberOfBuilders = 1;
+    var minimimumNumberOfBoxKickers = 4;
+    //Will sum up number of creeps. Find number of harvesters currently.
+    var numberOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
+    var numberOfUpgraders = _.sum(Game.creeps, (c) => c.memory.role == 'upgrader');
+    var numberOfBuilders = _.sum(Game.creeps, (c) => c.memory.role == 'builder');
+    var numberOfBoxKickers = _.sum(Game.creeps, (c) => c.memory.role == 'boxKicker');
+    
+    console.log(numberOfHarvesters);
+    //Generate new name, currently just game time.
+    var newName = utilities.newName();
+    
+    var harvesterFlag = null;
+    if(numberOfHarvesters < minimimumNumberOfHarvesters) {
+        harvesterFlag = true;
+    }
+    else {
+        harvesterFlag = false;
+    }
+
+    var upgraderFlag = null;
+    if(numberOfUpgraders < minimimumNumberOfUpgraders) {
+        upgraderFlag = true;
+    }
+    else {
+        upgraderFlag = false;
+    }
+
+    var builderFlag = null;
+    if(numberOfBuilders < minimimumNumberOfBuilders) {
+        builderFlag = true;
+    }
+    else {
+        builderFlag = false;
+    }
+
+    var boxKickerFlag = null;
+    if(numberOfBoxKickers < minimimumNumberOfBoxKickers) {
+        boxKickerFlag = true;
+    }
+    else {
+        boxKickerFlag = false;
+    }
 
     for(var name in Game.rooms) {
-        // console.log('Room "' +name+'" has ' +Game.rooms[name].energyAvailable+' energy');
+        console.log('Room "' +name+'" has ' +Game.rooms[name].energyAvailable+' energy');
     }
 
-    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    console.log('Harvesters: ' + harvesters.length);
-
-      if(harvesters.length < 2) {
-        if(Game.rooms[name].energyAvailable >= 300) {
-           var newName = 'Harvester' + Game.time;
-           console.log('Spawning new harvester: ' + newName);
-          Game.spawns['Home'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE, MOVE, MOVE], newName,
-              {memory: {
-                role: 'harvester',
-                working: false
-                }
-              });
+    // if(numberOfHarvesters < minimimumNumberOfHarvesters)
+    if(harvesterFlag) {
+        if(Game.rooms[name].energyAvailable > 550) {
+            Game.spawns['Home'].spawnCreep([WORK,WORK,WORK,WORK,WORK,MOVE,MOVE,MOVE,MOVE,MOVE], newName,
+            {memory: { role: 'harvester', working: false } });
         }
-        else if(Game.rooms[name].energyAvailable <= 300) {
-        // var newName = 'Harvester' + Game.time;
-        // console.log('Spawning new harvester: ' + newName);
-        Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], undefined,
-            {memory: { 
-              role: 'harvester',
-              working:false
-              }
-            });
+        else if(Game.rooms[name].energyAvailable <= 550) {
+            Game.spawns['Home'].spawnCreep([WORK,WORK,WORK,MOVE,MOVE,MOVE], newName,
+            {memory: {role: 'harvester', working:false} });
         }
-      }
+    }
+    else if(boxKickerFlag) {
+        if(Game.rooms[name].energyAvailable >= 400) {
+        Game.spawns['Home'].spawnCreep([CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], newName,
+            {memory: {role: 'boxKicker', working: false}});
+        }
+        else {
+            Game.spawns['Home'].spawnCreep([CARRY,CARRY,MOVE,MOVE], newName,
+                {memory: {role: 'boxKicker', working: false}});
+        }
+    }
+    // else if(numberOfUpgraders < minimimumNumberOfUpgraders)
+    else if(upgraderFlag) {
+        if(Game.rooms[name].energyAvailable <= 400) {
+            Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE,MOVE], newName,
+                {memory: {role: 'upgrader', working: false}});
+        }
+        else {
+        Game.spawns['Home'].spawnCreep([ATTACK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], newName,
+            // {memory: {role: 'upgrader', working: false}});
+            {memory: {role: 'upgrader', working: false}});
+        }
+    }
 
-        //  if(harvesters.length < 2) {
-        //   if(Game.rooms[name].energyAvailable >400) {
-
-        //   else {
-        //     var newName = 'Harvester' + Game.time;
-        //     console.log('Spawning new harvester: ' + newName);
-        //     Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,
-        //         {memory: {role: 'harvester'}});
-        //   }
-
-
-        // if(Game.spawns['Home'].spawning) {
-        //     var spawningCreep = Game.creeps[Game.spawns['Home'].spawning.name];
-        //     Game.spawns['Home'].room.visual.text(
-        //         '🛠️' + spawningCreep.memory.role,
-        //         Game.spawns['Home'].pos.x + 1,
-        //         Game.spawns['Home'].pos.y,
-        //         {align: 'left', opacity: 0.8});
-        // }
-
-
-
-    // var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    // // console.log('Harvesters: ' + harvesters.length);
-
-    // if(harvesters.length < 2) {
-    //     var newName = 'Harvester' + Game.time;
-    //     console.log('Spawning new harvester: ' + newName);
-    //     Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,
-    //         {memory: {role: 'harvester'}});
-    // }
-
-    var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-
-    if(builders.length < 0 && Game.rooms[name].energyAvailable >= 200) {
+    // if(builders.length < 4 && Game.rooms[name].energyAvailable >= 200 && numberOfHarvesters >= minimimumNumberOfHarvesters) {
+    else if(builderFlag) {
         var newName = 'Builder' + Game.time;
         console.log('Spawning new builder: ' + newName);
-        Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,
-            {memory: {role: 'builder',
-                working:false
-                }
+        Game.spawns['Home'].spawnCreep([ATTACK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], newName,
+            {memory: {role: 'builder', working:false }
             });
-    }
-
-    var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-
-    if(upgraders.length < 6 && harvesters.length == 2) {
-        if(Game.rooms[name].energyAvailable <= 300) {
-        var newName = 'Upgrader' + Game.time;
-        console.log('Spawning new upgrader: ' + newName);
-        Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE], newName,
-            {memory: {role: 'upgrader',
-                working: false
-            }
-            });
-        }
-        if(Game.rooms[name].energyAvailable >= 300) {
-            var newName = 'Upgrader' + Game.time;
-            console.log('Spawning new upgrader: ' + newName);
-            Game.spawns['Home'].spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE, MOVE, MOVE], newName,
-              {memory: {
-                role: 'upgrader',
-                working: false
-                }
-              });
-        }
     }
 
     for(var name in Game.creeps) {
@@ -112,6 +111,9 @@ module.exports.loop = function () {
         }
         if(creep.memory.role == 'builder') {
             roleBuilder.run(creep);
+        }
+        if(creep.memory.role == 'boxKicker') {
+            boxKicker.run(creep);
         }
     }
 

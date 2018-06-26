@@ -13,7 +13,8 @@ var roleBoxKicker = {
           var targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                            structure.energy < structure.energyCapacity;
+                        //return
+                         structure.energy < structure.energyCapacity;
                     }
             });
             if(targets.length > 0) {
@@ -21,15 +22,25 @@ var roleBoxKicker = {
                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }
+            // else if(Storage.isActive()) {
+            //     if(creep.transfer(sotrage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            //         creep.moveTo(storage, {visualizePathStyle:  {stroke: '#ffffff'}});
+            //     }
+            // }
+            else {
+                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller);
+                }
+            }
         }
       else{
-        var droppedEnergy = creep.room.find(FIND_DROPPED_ENERGY, { 
+        var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, { 
             filter: (d) => d.amount >= 50
         });
-        console.log(JSON.stringify(droppedEnergy));
+        // console.log(JSON.stringify(droppedEnergy));
         if(droppedEnergy.length) {
             var pickupDropped = creep.pickup(droppedEnergy[0]);
-            console.log(pickupDropped);
+            // console.log(pickupDropped);
         }
 
         if(droppedEnergy.length > 0 && pickupDropped == ERR_NOT_IN_RANGE) { 

@@ -14,9 +14,17 @@ var miner = {
       creep.memory.working = true;
     }
 
-    var source = creep.pos.findClosestByPath(FIND_SOURCES);
-    if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-      creep.moveTo(source);
+    // var source = creep.pos.findClosestByPath(FIND_SOURCES);
+    // var sources = room.find(FIND_SOURCES); 
+    // var switchSource = _.random(0,4) == 0;
+    // if(switchSource) {
+    //   used = sources[0];
+    // }
+    // else {
+    //   used = sources[1];
+    // }
+    if(creep.harvest(creep.memory.source) == ERR_NOT_IN_RANGE) {
+      creep.moveTo(creep.memory.source);
     }
   }
 };

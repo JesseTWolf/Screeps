@@ -1,4 +1,4 @@
-var harvestPrototype = {
+let harvestPrototype = {
 //   for(let name in Game.creeps) {}
 //   var creep = Game.creeps.[name];
 

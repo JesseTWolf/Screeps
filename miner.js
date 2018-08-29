@@ -3,7 +3,7 @@
 //     // super() 
 //     this.defaultEnergy = 500;
 //   }
-var miner = {
+let miner = {
   //@param {Creep} creep
 //   work() {
     run: function(creep) {

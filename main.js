@@ -7,18 +7,19 @@ var miner = require('roleMiner');
 
 module.exports.loop = function () {
 
-    const roomName = 'W8N3';
+    const roomName = 'W1N8';
+    const spawnName = 'Spawn-W1N8';
 
-    const sourceIds = ['26f20772347f879', '71ac0772347ffe6'];
+    const sourceIds = ['ab9e0774d1c107c', 'f5680774d1c1fe8'];
     // console.log(sourceIds[0]);
     
     var totalCreeps = Object.keys(Game.creeps).length;
 
     //Make sure to have minimum of 8 harvesters, 1 upgrader, 1 builder, and 10 boxKickers.
     var minimimumNumberOfHarvesters = 1;
-    var minimimumNumberOfUpgraders = 2;
+    var minimimumNumberOfUpgraders = 12;
     var minimimumNumberOfBuilders = 2;
-    var minimimumNumberOfBoxKickers = 4;
+    var minimimumNumberOfBoxKickers = 2;
     var minimimumNumberOfMiners = 2;
     //Will sum up number of creeps. Find number of harvesters currently.
     var numberOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
@@ -94,31 +95,31 @@ module.exports.loop = function () {
         //         {memory: {role: 'harvester', working:false} });
         // }
         // else {
-            Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE,MOVE], 
+            Game.spawns[spawnName].spawnCreep([WORK,CARRY,MOVE,MOVE], 
                 newName,
                 {memory: {role: 'harvester', working:false} });
         // }
     }
     else if(minerFlag) {
         if(Game.rooms[name].energyAvailable < 650) {
-            Game.spawns['Home'].spawnCreep([WORK,WORK,MOVE], 
+            Game.spawns[spawnName].spawnCreep([WORK,WORK,MOVE], 
                 newName,
                 {memory: {role: 'miner', working: false}});
         }
         else {
-        Game.spawns['Home'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,MOVE], 
+        Game.spawns[spawnName].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,MOVE], 
                 newName,
                 {memory: {role: 'miner', working: false}});
         }
     }
     else if(boxKickerFlag) {
         if(Game.rooms[name].energyAvailable >= 550) {
-        Game.spawns['Home'].spawnCreep([WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], 
+        Game.spawns[spawnName].spawnCreep([WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], 
             newName,
             {memory: {role: 'boxKicker', working: false}});
         }
         else {
-            Game.spawns['Home'].spawnCreep([CARRY,CARRY,MOVE,MOVE], 
+            Game.spawns[spawnName].spawnCreep([CARRY,CARRY,MOVE,MOVE], 
                 newName,
                 {memory: {role: 'boxKicker', working: false}});
         }
@@ -126,12 +127,12 @@ module.exports.loop = function () {
     // else if(numberOfUpgraders < minimimumNumberOfUpgraders)
     else if(upgraderFlag) {
         if(Game.rooms[name].energyAvailable <= 400) {
-            Game.spawns['Home'].spawnCreep([WORK,CARRY,MOVE,MOVE], 
+            Game.spawns[spawnName].spawnCreep([WORK,CARRY,MOVE,MOVE], 
                     newName,
                     {memory: {role: 'upgrader', working: false}});
         }
         else {
-        Game.spawns['Home'].spawnCreep([ATTACK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], 
+        Game.spawns[spawnName].spawnCreep([ATTACK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], 
                 newName,
                 {memory: {role: 'upgrader', working: false}});
         }
@@ -139,7 +140,7 @@ module.exports.loop = function () {
 
     // if(builders.length < 4 && Game.rooms[name].energyAvailable >= 200 && numberOfHarvesters >= minimimumNumberOfHarvesters) {
     else if(builderFlag) {
-        Game.spawns['Home'].spawnCreep([ATTACK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], 
+        Game.spawns[spawnName].spawnCreep([ATTACK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], 
             newName,
             {memory: {role: 'builder', working:false }});
     }

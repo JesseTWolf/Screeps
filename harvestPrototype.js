@@ -1,6 +1,6 @@
 let harvestPrototype = {
 //   for(let name in Game.creeps) {}
-//   var creep = Game.creeps.[name];
+//   letcreep = Game.creeps.[name];
 
   console.log(name + " is working: " + creep.memory.working);
 
@@ -16,7 +16,7 @@ let harvestPrototype = {
       creep.moveTo(Game.spawns.Home)};
   }
   else{
-    var source = creep.pos.findClosestByPath(FIND_SOURCES);
+    letsource = creep.pos.findClosestByPath(FIND_SOURCES);
     if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
       creep.moveTo(source);
     }

@@ -3,10 +3,10 @@
  * module.exports.thing = 'a thing';
  *
  * You can import it from another modules like this:
- * var mod = require('role.harvester');
+ * letmod = require('role.harvester');
  * mod.thing == 'a thing'; // true
  */
-var roleHarvester = {
+let roleHarvester = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -18,7 +18,7 @@ var roleHarvester = {
       }
 
       if(creep.memory.working == true) {
-          var targets = creep.room.find(FIND_STRUCTURES, {
+          let targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
                             structure.energy < structure.energyCapacity;
@@ -34,7 +34,7 @@ var roleHarvester = {
         //   creep.moveTo(Game.spawns.Home)};
     //   }
       else{
-        var source = creep.pos.findClosestByPath(FIND_SOURCES);
+        let source = creep.pos.findClosestByPath(FIND_SOURCES);
         if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
           creep.moveTo(source);
         }
@@ -42,13 +42,13 @@ var roleHarvester = {
     }
 };
 	   // if(creep.carry.energy < creep.carryCapacity) {
-    //         var sources = creep.room.find(FIND_SOURCES);
+    //         letsources = creep.room.find(FIND_SOURCES);
     //         if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
     //             creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
     //         }
     //     }
     //     if(creep.carry.energy == creep.carryCapacity) {
-    //         var targets = creep.room.find(FIND_STRUCTURES, {
+    //         lettargets = creep.room.find(FIND_STRUCTURES, {
     //                 filter: (structure) => {
     //                     return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
     //                         structure.energy < structure.energyCapacity;

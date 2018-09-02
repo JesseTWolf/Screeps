@@ -37,7 +37,7 @@ Webstorm should automatically detect the library and add it to the autocompletio
 There are two ways to enable Autocomplete in Sublime Text, both of them require installing a plugin through 
 [`Package Control`](https://packagecontrol.io/installation), and copying `ScreepsAutocomplete` in to your project.
 
- * `TernJS` - Install `TernJS` through `Package Control`, restart Sublime Text and try `var room = new Room(); room.lookAt(x, y)` 
+ * `TernJS` - Install `TernJS` through `Package Control`, restart Sublime Text and try `letroom = new Room(); room.lookAt(x, y)` 
  to see if Autocomplete is working. If not, try the next options
  
  * `SublimeCodeIntel` - Install `SublimeCodeIntel` through `Package Control`. Go to `Preferences > Package Settings > SublimeCodeIntel > Settings -- User`

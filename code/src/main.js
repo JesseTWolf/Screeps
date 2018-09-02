@@ -1,10 +1,3 @@
-let roleHarvester = require('roleHarvester');
-let roleUpgrader = require('roleUpgrader');
-let roleBuilder = require('roleBuilder');
-let utilities = require('utilities');
-let boxKicker = require('roleBoxKicker');
-let miner = require('roleMiner');
-
 module.exports.loop = function () {
 
     const roomName = 'W1N8';
@@ -13,21 +6,21 @@ module.exports.loop = function () {
     const sourceIds = ['ab9e0774d1c107c', 'f5680774d1c1fe8'];
     // console.log(sourceIds[0]);
 
-    let totalCreeps = Object.keys(Game.creeps).length;
+    lettotalCreeps = Object.keys(Game.creeps).length;
 
     //Make sure to have minimum of 8 harvesters, 1 upgrader, 1 builder, and 10 boxKickers.
-    let minimimumNumberOfHarvesters = 1;
-    let minimimumNumberOfUpgraders = 1;
-    let minimimumNumberOfBuilders = 2;
-    let minimimumNumberOfBoxKickers = 2;
-    let minimimumNumberOfMiners = 2;
+    letminimimumNumberOfHarvesters = 1;
+    letminimimumNumberOfUpgraders = 4;
+    letminimimumNumberOfBuilders = 2;
+    letminimimumNumberOfBoxKickers = 2;
+    letminimimumNumberOfMiners = 2;
 
     //Will sum up number of creeps. Find number of harvesters currently.
-    let numberOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
-    let numberOfUpgraders = _.sum(Game.creeps, (c) => c.memory.role == 'upgrader');
-    let numberOfBuilders = _.sum(Game.creeps, (c) => c.memory.role == 'builder');
-    let numberOfBoxKickers = _.sum(Game.creeps, (c) => c.memory.role == 'boxKicker');
-    let numberOfMiners = _.sum(Game.creeps, (c) => c.memory.role == 'miner');
+    letnumberOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
+    letnumberOfUpgraders = _.sum(Game.creeps, (c) => c.memory.role == 'upgrader');
+    letnumberOfBuilders = _.sum(Game.creeps, (c) => c.memory.role == 'builder');
+    letnumberOfBoxKickers = _.sum(Game.creeps, (c) => c.memory.role == 'boxKicker');
+    letnumberOfMiners = _.sum(Game.creeps, (c) => c.memory.role == 'miner');
 
     console.log('Harvesters: ' + numberOfHarvesters);
     console.log('Upgraders: ' + numberOfUpgraders);
@@ -35,9 +28,9 @@ module.exports.loop = function () {
     console.log('BoxKickers: ' + numberOfBoxKickers);
     console.log('Miners: ' + numberOfMiners);
     //Generate new name, currently just game time.
-    let newName = utilities.newName();
+    letnewName = utilities.newName();
 
-    let harvesterFlag = null;
+    letharvesterFlag = null;
     if(numberOfHarvesters < minimimumNumberOfHarvesters) {
         harvesterFlag = true;
     }
@@ -45,7 +38,7 @@ module.exports.loop = function () {
         harvesterFlag = false;
     }
 
-    let upgraderFlag = null;
+    letupgraderFlag = null;
     if(numberOfUpgraders < minimimumNumberOfUpgraders) {
         upgraderFlag = true;
     }
@@ -53,7 +46,7 @@ module.exports.loop = function () {
         upgraderFlag = false;
     }
 
-    let builderFlag = null;
+    letbuilderFlag = null;
     if(numberOfBuilders < minimimumNumberOfBuilders) {
         builderFlag = true;
     }
@@ -61,7 +54,7 @@ module.exports.loop = function () {
         builderFlag = false;
     }
 
-    let boxKickerFlag = null;
+    letboxKickerFlag = null;
     if(numberOfBoxKickers < minimimumNumberOfBoxKickers) {
         boxKickerFlag = true;
     }
@@ -69,7 +62,7 @@ module.exports.loop = function () {
         boxKickerFlag = false;
     }
 
-    let minerFlag = null;
+    letminerFlag = null;
     if(numberOfMiners < minimimumNumberOfMiners) {
         minerFlag = true;
     }
@@ -77,7 +70,7 @@ module.exports.loop = function () {
         minerFlag = false;
     }
 
-    for(var name in Game.rooms) {
+    for(letname in Game.rooms) {
         console.log('Room "' +name+'" has ' +Game.rooms[name].energyAvailable+' energy');
     }
 
@@ -179,8 +172,8 @@ module.exports.loop = function () {
     }
 // || minimimumNumberOfBuilders < creep.room.find(FIND_CONSTRUCTION_SITES)
     // console.log(creep.room.find(FIND_CONSTRUCTION_SITES));
-    for(let name in Game.creeps) {
-        let creep = Game.creeps[name];
+    for(letname in Game.creeps) {
+        letcreep = Game.creeps[name];
         if(creep.memory.role == 'harvester') {
             roleHarvester.run(creep);
         }
@@ -198,18 +191,18 @@ module.exports.loop = function () {
         }
     }
 
-    for(let i in Memory.creeps) {
+    for(leti in Memory.creeps) {
         if(!Game.creeps[i]) {
             delete Memory.creeps[i];
         }
     }
 
     // function defendRoom(roomName) {
-        let hostiles = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
+        lethostiles = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
         if(hostiles.length > 0) {
-            let username = hostiles[0].owner.username;
+            letusername = hostiles[0].owner.username;
             Game.notify(`User ${username} spotted in room ${roomName}`);
-            let towers = Game.rooms[roomName].find(
+            lettowers = Game.rooms[roomName].find(
                 FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
             towers.forEach(tower => tower.attack(hostiles[0]));
         }

@@ -14,9 +14,9 @@ let miner = {
       creep.memory.working = true;
     }
 
-    // var source = creep.pos.findClosestByPath(FIND_SOURCES);
-    // var sources = room.find(FIND_SOURCES); 
-    // var switchSource = _.random(0,4) == 0;
+    // letsource = creep.pos.findClosestByPath(FIND_SOURCES);
+    // letsources = room.find(FIND_SOURCES); 
+    // letswitchSource = _.random(0,4) == 0;
     // if(switchSource) {
     //   used = sources[0];
     // }

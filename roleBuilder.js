@@ -3,12 +3,12 @@
  * module.exports.thing = 'a thing';
  *
  * You can import it from another modules like this:
- * var mod = require('role.builder');
+ * letmod = require('role.builder');
  * mod.thing == 'a thing'; // true
  */
-// var roleUpgrader = require('roleUpgrader');
+// letroleUpgrader = require('roleUpgrader');
 
-var roleBuilder = {
+let roleBuilder = {
     /** @param {Creep} creep **/
     run: function(creep) {
 		if(creep.memory.working == true && creep.carry.energy == 0) {
@@ -20,7 +20,7 @@ var roleBuilder = {
 		}
 
 		if(creep.memory.working == true) {
-			var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+			let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
 			// console.log(targets);
             if(targets.length) {
                 if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
@@ -32,21 +32,22 @@ var roleBuilder = {
 			  }
 		}
 		else {
-      var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+      let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (s) => s.structureType == STRUCTURE_CONTAINER
-                    && s.store[RESOURCE_ENERGY] > 0
+                    && s.store[RESOURCE_ENERGY] > 200
       });
-			var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
+			let droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
 				filter: (d) => d.amount >= 100
 			});
-      
+
       if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
         creep.moveTo(container)
         creep.say('⛋')
       }
 			// console.log(JSON.stringify(droppedEnergy));
+      let pickupDropped;
 			if(droppedEnergy.length) {
-				var pickupDropped = creep.pickup(droppedEnergy[0]);
+				pickupDropped = creep.pickup(droppedEnergy[0]);
 				// console.log(pickupDropped);
 			}
 
@@ -54,7 +55,7 @@ var roleBuilder = {
 				creep.moveTo(droppedEnergy[0]);
 			}
 
-			// var sources = creep.room.find(FIND_SOURCES);
+			// letsources = creep.room.find(FIND_SOURCES);
             // if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
             //     creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
             // }
@@ -70,7 +71,7 @@ var roleBuilder = {
 	    //     creep.say('🚧 build');
 	    // }
 	    // if(creep.memory.building) {
-	    //     var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+	    //     lettargets = creep.room.find(FIND_CONSTRUCTION_SITES);
         //     if(targets.length) {
         //         if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
         //             creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});

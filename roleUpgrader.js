@@ -3,10 +3,10 @@
  * module.exports.thing = 'a thing';
  *
  * You can import it from another modules like this:
- * var mod = require('role.upgrader');
+ * letmod = require('role.upgrader');
  * mod.thing == 'a thing'; // true
  */
-var roleUpgrader = {
+let roleUpgrader = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -24,18 +24,19 @@ var roleUpgrader = {
       }
       else{
 
-        var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
           filter: (s) => s.structureType == STRUCTURE_CONTAINER
-                      && s.store[RESOURCE_ENERGY] > 0
+                      && s.store[RESOURCE_ENERGY] > 200
         });
 
-        var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
+        let droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
           filter: (d) => d.amount >= 100
         });
 
         // console.log(JSON.stringify(droppedEnergy));
+        let pickupDropped;
         if(droppedEnergy.length) {
-            var pickupDropped = creep.pickup(droppedEnergy[0]);
+            pickupDropped = creep.pickup(droppedEnergy[0]);
             // console.log(pickupDropped);
         }
 
@@ -47,7 +48,7 @@ var roleUpgrader = {
           creep.moveTo(container)
           creep.say('⛋')
         }
-          // var source = creep.pos.findClosestByPath(FIND_SOURCES);
+          // letsource = creep.pos.findClosestByPath(FIND_SOURCES);
           // if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
           //   creep.moveTo(source);
           // }

@@ -1,4 +1,4 @@
-var roleBoxKicker = {
+let roleBoxKicker = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -10,14 +10,14 @@ var roleBoxKicker = {
       }
 
       if(creep.memory.working == true) {
-          var targets = creep.room.find(FIND_STRUCTURES, {
+          let targets = creep.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_TOWER) &&
                 //return
                  structure.energy < structure.energyCapacity;
                 }
             });
-          // var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+          // letcontainer = creep.pos.findClosestByPath(FIND_STRUCTURES, {
           //   filter: (s) => s.structureType == STRUCTURE_CONTAINER
           //                 && s.store[RESOURCE_ENERGY] > 0
           //   });
@@ -42,20 +42,21 @@ var roleBoxKicker = {
         // if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
         //   creep.moveTo(container)
         // }
-        var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        let container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
           filter: (s) => s.structureType == STRUCTURE_CONTAINER
-                      && s.store[RESOURCE_ENERGY] > 0
+                      && s.store[RESOURCE_ENERGY] > 200
         });
-        var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
+        let droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
             filter: (d) => d.amount >= 100
         });
         if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           creep.moveTo(container)
           creep.say('⛋')
         }
-        // console.log(JSON.stringify(droppedEnergy));
+        // console.log(JSON.stringify(droppedEnergy));\
+        let pickupDropped;
         if(droppedEnergy.length) {
-            var pickupDropped = creep.pickup(droppedEnergy[0]);
+            pickupDropped = creep.pickup(droppedEnergy[0]);
             // console.log(pickupDropped);
         }
 
@@ -63,7 +64,7 @@ var roleBoxKicker = {
             creep.moveTo(droppedEnergy[0]);
         }
 
-        // var source = creep.pos.findClosestByPath(FIND_SOURCES);
+        // letsource = creep.pos.findClosestByPath(FIND_SOURCES);
         // if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
         //   creep.moveTo(source);
         // }

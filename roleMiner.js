@@ -3,10 +3,10 @@
  * module.exports.thing = 'a thing';
  *
  * You can import it from another modules like this:
- * var mod = require('role.harvester');
+ * letmod = require('role.harvester');
  * mod.thing == 'a thing'; // true
  */
-var roleMiner = {
+let roleMiner = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
@@ -18,7 +18,7 @@ var roleMiner = {
     //   }
 
     //   if(creep.memory.working == true) {
-        //   var targets = creep.room.find(FIND_STRUCTURES, {
+        //   lettargets = creep.room.find(FIND_STRUCTURES, {
         //             filter: (structure) => {
         //                 return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
         //                     structure.energy < structure.energyCapacity;
@@ -31,14 +31,14 @@ var roleMiner = {
             // }
         // }
     //   else{
-        // var source = creep.pos.findClosestByPath(FIND_SOURCES);
+        // letsource = creep.pos.findClosestByPath(FIND_SOURCES);
         // console.log(source);
         if(!creep.memory.harvestPointId) {
             let occupiedHarvestPoints = _.filter(Game.creeps, (creep) => creep.memory.role == 'miner').map((el) => el.memory.harvestPointId);
             let closestSource = creep.pos.findClosestByRange(FIND_SOURCES, {filter: (source) => occupiedHarvestPoints.indexOf(source.id) == -1});
             creep.memory.harvestPointId = closestSource.id;
         }
-        var source = Game.getObjectById(creep.memory.harvestPointId);
+        let source = Game.getObjectById(creep.memory.harvestPointId);
         // if(source) {
             if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source);

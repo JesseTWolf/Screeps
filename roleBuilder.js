@@ -39,6 +39,7 @@ var roleBuilder = {
 			var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
 				filter: (d) => d.amount >= 100
 			});
+      
       if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
         creep.moveTo(container)
         creep.say('⛋')

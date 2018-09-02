@@ -22,18 +22,30 @@ var roleUpgrader = {
           creep.moveTo(creep.room.controller);
         }
       }
-        else{
-          var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, { 
-            filter: (d) => d.amount >= 50
+      else{
+
+        var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+          filter: (s) => s.structureType == STRUCTURE_CONTAINER
+                      && s.store[RESOURCE_ENERGY] > 0
         });
+
+        var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
+          filter: (d) => d.amount >= 100
+        });
+
         // console.log(JSON.stringify(droppedEnergy));
         if(droppedEnergy.length) {
             var pickupDropped = creep.pickup(droppedEnergy[0]);
             // console.log(pickupDropped);
         }
 
-        if(droppedEnergy.length > 0 && pickupDropped == ERR_NOT_IN_RANGE) { 
+        if(droppedEnergy.length > 0 && pickupDropped == ERR_NOT_IN_RANGE) {
             creep.moveTo(droppedEnergy[0]);
+        }
+
+        if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(container)
+          creep.say('⛋')
         }
           // var source = creep.pos.findClosestByPath(FIND_SOURCES);
           // if(creep.harvest(source) == ERR_NOT_IN_RANGE) {

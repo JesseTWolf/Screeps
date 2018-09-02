@@ -32,16 +32,24 @@ var roleBuilder = {
 			  }
 		}
 		else {
-			var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, { 
-				filter: (d) => d.amount >= 50
+      var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (s) => s.structureType == STRUCTURE_CONTAINER
+                    && s.store[RESOURCE_ENERGY] > 0
+      });
+			var droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
+				filter: (d) => d.amount >= 100
 			});
+      if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(container)
+        creep.say('⛋')
+      }
 			// console.log(JSON.stringify(droppedEnergy));
 			if(droppedEnergy.length) {
 				var pickupDropped = creep.pickup(droppedEnergy[0]);
 				// console.log(pickupDropped);
 			}
-	
-			if(droppedEnergy.length > 0 && pickupDropped == ERR_NOT_IN_RANGE) { 
+
+			if(droppedEnergy.length > 0 && pickupDropped == ERR_NOT_IN_RANGE) {
 				creep.moveTo(droppedEnergy[0]);
 			}
 

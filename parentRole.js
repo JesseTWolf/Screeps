@@ -1,12 +1,9 @@
 class ParentRole {
   constructor(name,energy,parts) {
     var name = name;
-    var energyRequired = energy;
-    var bodyParts = parts;
-  }
-  constructor(name) {
-    var name = name;
-    var energyRequired = null;
-    var bodyParts = [WORK,CARRY,MOVE];
+    // if i pass something it will initialize as what is passed in.
+    // if nothing is passed in then the "||" sets the variable equal to '0'.
+    var energyRequired = energy || 0;
+    var bodyParts = parts || [WORK,CARRY,MOVE];
   }
 }

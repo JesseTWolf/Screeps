@@ -17,7 +17,7 @@ module.exports = function(grunt) {
           'src/Config.js',
           'src/main.js'
         ],
-        dest: '../main2.js'
+        dest: '../main.js'
       }
     },
 

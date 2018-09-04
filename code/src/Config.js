@@ -6,6 +6,6 @@ class Config {
   }
 
   static get ROLES() {
-    return [BoxKicker]
+    return [Gatherer,BoxKicker, Builder, Miner, Upgrader]
   }
 }

@@ -2,7 +2,7 @@ class Colony {
   constructor(name) {
     this.name = name
     // this.spawn = new Spawn(Game.spawns[name], this)
-    this.spawn = new Spawn(Game.spawns[name])
+    this.spawn = new Spawn(Game.spawns[name],this)
     this.room = this.spawn.ref.room
     this.creeps = this.getCreepList() // list of creeps for this colony
   }
@@ -10,7 +10,7 @@ class Colony {
   tick() {
     this.findNewCreepToSpawn()
     for (let creep of this.creeps) {
-      console.log("Creeps within Colony tick method are: " +creep)
+      // console.log("Creeps within Colony tick method are: " +creep)
       CreepHelper.runCreepRole(creep, this)
     }
   }
@@ -35,11 +35,16 @@ class Colony {
     let numberOfBoxKickers = _.sum(Game.creeps, (c) => c.memory.role == 'BoxKicker');
     let numberOfMiners = _.sum(Game.creeps, (c) => c.memory.role == 'Miner');
 
+    for(var name in Game.rooms) {
+        console.log('Room "' +name+'" has ' +Game.rooms[name].energyAvailable+' energy');
+    }
+
     console.log('Harvesters: ' + numberOfHarvesters);
     console.log('Upgraders: ' + numberOfUpgraders);
     console.log('Builders: ' + numberOfBuilders);
     console.log('BoxKickers: ' + numberOfBoxKickers);
     console.log('Miners: ' + numberOfMiners);
+    console.log("   ")
 
     let harvesterFlag = null;
     if(numberOfHarvesters < minimimumNumberOfHarvesters) {
@@ -65,6 +70,7 @@ class Colony {
     let boxKickerFlag = null;
     if(numberOfBoxKickers < minimimumNumberOfBoxKickers) {
         boxKickerFlag = true;
+        console.log(boxKickerFlag)
     }
     else { boxKickerFlag = false;
     }
@@ -80,15 +86,17 @@ class Colony {
     //     console.log('Room "' +name+'" has ' +Game.rooms[this.colony].energyAvailable+' energy');
     // }
 
-    if(totalCreeps == 0) {
-      this.spawn.spawnCreep('Harvester')
-    }
+    // if(totalCreeps == 0) {
+    //   this.spawn.spawnCreep('Harvester')
+    // }
 
-    else if(minerFlag) {
+    // else if(minerFlag) {
+    if(minerFlag) {
       this.spawn.spawnCreep('Miner')
     }
 
     else if(boxKickerFlag) {
+      // console.log('inside boxKickerFlag if statement')
       this.spawn.spawnCreep('BoxKicker')
     }
 

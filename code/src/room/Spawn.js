@@ -84,6 +84,13 @@ class Spawn extends Entity {
           { memory: { role:'Builder', colony: this.colony.name, working: false}})
       }
     }
+
+    else if(info === 'RepairMan') {
+      // console.log('within repairman')
+      this.ref.spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE],
+        'RepairMan ' + newName,
+        { memory: { role:'RepairMan', colony: this.colony.name, working: false}})
+    }
   }
     // spawn creep with colony variable in memory
 }

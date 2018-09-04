@@ -11,7 +11,7 @@ class Builder extends Gatherer {
     }
     else if(this.ref.memory.working === true){
       this.build();
-      this.upgradeRoom();
+      // this.upgradeRoom();
     }
     // this.ref.moveTo( /* SOMEWHERE */ ) // instead of creep.moveTo()
   }
@@ -22,6 +22,7 @@ class Builder extends Gatherer {
             if(targets.length) {
                 if(this.ref.build(targets[0]) == ERR_NOT_IN_RANGE) {
                     this.ref.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                    this.ref.say('🔨')
                 }
 			}
   }

@@ -4,6 +4,7 @@ class Colony {
     // this.spawn = new Spawn(Game.spawns[name], this)
     this.spawn = new Spawn(Game.spawns[name],this)
     this.room = this.spawn.ref.room
+    this.towerList = this.getTowerList()
     this.creeps = this.getCreepList() // list of creeps for this colony
   }
 
@@ -13,11 +14,21 @@ class Colony {
       // console.log("Creeps within Colony tick method are: " +creep)
       CreepHelper.runCreepRole(creep, this)
     }
+
+    for(let tower of this.towerList) {
+      (new Tower(tower).tick())
+    }
   }
 
   getCreepList() {
     let list = Object.values(Game.creeps).filter(creep => creep.memory.colony === this.name)
     return list
+  }
+
+  getTowerList() {
+    return this.room.find(FIND_STRUCTURES, {
+      filter: { structureType: STRUCTURE_TOWER }
+    })
   }
 
   findNewCreepToSpawn() {
@@ -28,12 +39,14 @@ class Colony {
     let minimimumNumberOfBuilders = 2;
     let minimimumNumberOfBoxKickers = 3;
     let minimimumNumberOfMiners = 2;
+    let minimimumNumberOfRepairMan = 1;
 
-    let numberOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'Harvester');
-    let numberOfUpgraders = _.sum(Game.creeps, (c) => c.memory.role == 'Upgrader');
-    let numberOfBuilders = _.sum(Game.creeps, (c) => c.memory.role == 'Builder');
-    let numberOfBoxKickers = _.sum(Game.creeps, (c) => c.memory.role == 'BoxKicker');
-    let numberOfMiners = _.sum(Game.creeps, (c) => c.memory.role == 'Miner');
+    let numberOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role === 'Harvester');
+    let numberOfUpgraders = _.sum(Game.creeps, (c) => c.memory.role === 'Upgrader');
+    let numberOfBuilders = _.sum(Game.creeps, (c) => c.memory.role === 'Builder');
+    let numberOfBoxKickers = _.sum(Game.creeps, (c) => c.memory.role === 'BoxKicker');
+    let numberOfMiners = _.sum(Game.creeps, (c) => c.memory.role === 'Miner');
+    let numberOfRepairMan = _.sum(Game.creeps, (c) => c.memory.role === 'RepairMan');
 
     for(var name in Game.rooms) {
         console.log('Room "' +name+'" has ' +Game.rooms[name].energyAvailable+' energy');
@@ -44,6 +57,7 @@ class Colony {
     console.log('Builders: ' + numberOfBuilders);
     console.log('BoxKickers: ' + numberOfBoxKickers);
     console.log('Miners: ' + numberOfMiners);
+    console.log('RepairMan: ' + numberOfRepairMan);
     console.log("   ")
 
     let harvesterFlag = null;
@@ -70,7 +84,7 @@ class Colony {
     let boxKickerFlag = null;
     if(numberOfBoxKickers < minimimumNumberOfBoxKickers) {
         boxKickerFlag = true;
-        console.log(boxKickerFlag)
+        // console.log(boxKickerFlag)
     }
     else { boxKickerFlag = false;
     }
@@ -80,6 +94,13 @@ class Colony {
         minerFlag = true;
     }
     else { minerFlag = false;
+    }
+
+    let repairManFlag = null;
+    if(numberOfRepairMan < minimimumNumberOfRepairMan) {
+      repairManFlag = true;
+    }
+    else { repairManFlag = false;
     }
 
     // for(var name in Game.rooms) {
@@ -107,6 +128,19 @@ class Colony {
     else if(builderFlag) {
       this.spawn.spawnCreep('Builder')
     }
+
+    else if(repairManFlag) {
+      this.spawn.spawnCreep('RepairMan')
+    }
+
+    // let hostiles = this.ref.find(FIND_HOSTILE_CREEPS);
+    // if(hostiles.length > 0) {
+    //     let username = hostiles[0].owner.username;
+    //     Game.notify(`User ${username} spotted in room ${roomName}`);
+    //     let towers = this.ref.find(
+    //         FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
+    //     towers.forEach(tower => tower.attack(hostiles[0]));
+    // }
 
     // // for each creeps to spawn for the current colony level
     // for (let creepToSpawn of creepsToSpawn) {
@@ -178,7 +212,7 @@ class Gatherer extends Creep {
     // console.log("within Gatherer pickupEnergyMethod")
     let container = this.ref.pos.findClosestByPath(FIND_STRUCTURES, {
       filter: (s) => s.structureType == STRUCTURE_CONTAINER
-                  && s.store[RESOURCE_ENERGY] > 200
+                  && s.store[RESOURCE_ENERGY] > 500
     });
 
     let droppedEnergy = this.ref.room.find(FIND_DROPPED_RESOURCES, {
@@ -193,9 +227,10 @@ class Gatherer extends Creep {
 
     if(droppedEnergy.length > 0 && pickupDropped == ERR_NOT_IN_RANGE) {
         this.ref.moveTo(droppedEnergy[0]);
+        this.ref.say('💧')
     }
 
-    if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+    else if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
       this.ref.moveTo(container)
       this.ref.say('⛋')
     }
@@ -204,6 +239,7 @@ class Gatherer extends Creep {
   upgradeRoom() {
     if(this.ref.upgradeController(this.ref.room.controller) == ERR_NOT_IN_RANGE) {
       this.ref.moveTo(this.ref.room.controller);
+      this.ref.say('🔋')
     }
   }
 
@@ -313,7 +349,7 @@ class Builder extends Gatherer {
     }
     else if(this.ref.memory.working === true){
       this.build();
-      this.upgradeRoom();
+      // this.upgradeRoom();
     }
     // this.ref.moveTo( /* SOMEWHERE */ ) // instead of creep.moveTo()
   }
@@ -324,6 +360,7 @@ class Builder extends Gatherer {
             if(targets.length) {
                 if(this.ref.build(targets[0]) == ERR_NOT_IN_RANGE) {
                     this.ref.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                    this.ref.say('🔨')
                 }
 			}
   }
@@ -349,6 +386,39 @@ class Miner extends Gatherer {
             if(this.ref.harvest(source) == ERR_NOT_IN_RANGE) {
                 this.ref.moveTo(source);
             }
+  }
+}
+class RepairMan extends Gatherer {
+  constructor(ref, colony) {
+    super(ref, colony)
+  }
+
+  tick() {
+    this.checkWorkingStatus();
+    if(this.ref.memory.working === false) {
+      this.pickupEnergy();
+    }
+    else if(this.ref.memory.working === true){
+      // this.build();
+      this.repairAllTheThings()
+      // this.upgradeRoom();
+    }
+
+  }
+
+  repairAllTheThings() {
+    let targets = this.ref.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+              return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_ROAD || structure.structureType == STRUCTURE_STORAGE) &&
+                 structure.hits < structure.hitsMax;
+                }
+            });
+              if(targets.length) {
+                  if(this.ref.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+                      this.ref.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                      this.ref.say('🔧')
+                  }
+  			}
   }
 }
 class Upgrader extends Gatherer {
@@ -454,8 +524,43 @@ class Spawn extends Entity {
           { memory: { role:'Builder', colony: this.colony.name, working: false}})
       }
     }
+
+    else if(info === 'RepairMan') {
+      // console.log('within repairman')
+      this.ref.spawnCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE],
+        'RepairMan ' + newName,
+        { memory: { role:'RepairMan', colony: this.colony.name, working: false}})
+    }
   }
     // spawn creep with colony variable in memory
+}
+class Tower extends Entity {
+  constructor(ref) {
+    super(ref)
+  }
+
+  tick() {
+    let hostiles = this.ref.room.find(FIND_HOSTILE_CREEPS)
+
+    if(hostiles.length) {
+      this.attack(hostiles)
+    }
+    else {
+      let damagedCreeps = this.ref.room.find(FIND_MY_CREEPS).filter(creep => {
+        return creep.hits < creep.hitsMax
+      })
+
+      this.heal(damagedCreeps)
+    }
+  }
+
+  attack(hostiles) {
+    this.ref.attack(hostiles[0])
+  }
+
+  heal(damagedCreeps) {
+    this.ref.heal(damagedCreeps)
+  }
 }
 class Config {
   constructor() {}
@@ -465,7 +570,7 @@ class Config {
   }
 
   static get ROLES() {
-    return [Gatherer,BoxKicker, Builder, Miner, Upgrader]
+    return [Gatherer,BoxKicker, Builder, RepairMan, Miner, Upgrader]
   }
 }
 for (let colonyName of Config.COLONIES) {

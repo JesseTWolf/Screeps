@@ -8,7 +8,7 @@ class Gatherer extends Creep {
     // console.log("within Gatherer pickupEnergyMethod")
     let container = this.ref.pos.findClosestByPath(FIND_STRUCTURES, {
       filter: (s) => s.structureType == STRUCTURE_CONTAINER
-                  && s.store[RESOURCE_ENERGY] > 200
+                  && s.store[RESOURCE_ENERGY] > 500
     });
 
     let droppedEnergy = this.ref.room.find(FIND_DROPPED_RESOURCES, {
@@ -23,9 +23,10 @@ class Gatherer extends Creep {
 
     if(droppedEnergy.length > 0 && pickupDropped == ERR_NOT_IN_RANGE) {
         this.ref.moveTo(droppedEnergy[0]);
+        this.ref.say('💧')
     }
 
-    if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+    else if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
       this.ref.moveTo(container)
       this.ref.say('⛋')
     }
@@ -34,6 +35,7 @@ class Gatherer extends Creep {
   upgradeRoom() {
     if(this.ref.upgradeController(this.ref.room.controller) == ERR_NOT_IN_RANGE) {
       this.ref.moveTo(this.ref.room.controller);
+      this.ref.say('🔋')
     }
   }
 

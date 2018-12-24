@@ -12,7 +12,7 @@ class Gatherer extends Creep {
     });
 
     let droppedEnergy = this.ref.room.find(FIND_DROPPED_RESOURCES, {
-      filter: (d) => d.amount >= 100
+      filter: (d) => d.amount >= 150
     });
 
     let pickupDropped;

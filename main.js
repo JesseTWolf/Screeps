@@ -108,6 +108,7 @@ class Colony {
     // }
 
     // if(totalCreeps == 0) {
+    // if(harvesterFlag) {
     //   this.spawn.spawnCreep('Harvester')
     // }
 
@@ -216,7 +217,7 @@ class Gatherer extends Creep {
     });
 
     let droppedEnergy = this.ref.room.find(FIND_DROPPED_RESOURCES, {
-      filter: (d) => d.amount >= 100
+      filter: (d) => d.amount >= 150
     });
 
     let pickupDropped;
@@ -365,6 +366,60 @@ class Builder extends Gatherer {
 			}
   }
 }
+class Harvester extends Gatherer {
+
+  constructor(ref, colony) {
+    super(ref, colony)
+  }
+
+  tick() {
+    this.checkWorkingStatus();
+    if(this.ref.memory.working === false) {
+    // if(this.ref.energyAvailable <= this.ref.energyCapacity) {
+      this.pickupEnergy();
+    }
+    // else if(this.ref.memory.working === false) {
+    else if(this.ref.memory.working === true) {
+      this.dropOffEnergy();
+      // console.log("no mass energy to drop off")
+      // this.upgradeRoom();
+    }
+    // this.ref.moveTo( /* SOMEWHERE */ ) // instead of creep.moveTo()
+  }
+
+  dropOffEnergy() {
+    // console.log("hoopla")
+    let targets = this.ref.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_TOWER) &&
+                //return
+                 structure.energy < structure.energyCapacity;
+                }
+            });
+          // letcontainer = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+          //   filter: (s) => s.structureType == STRUCTURE_CONTAINER
+          //                 && s.store[RESOURCE_ENERGY] > 0
+          //   });
+            if(targets.length > 0) {
+                if(this.ref.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    this.ref.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+            // break;
+            // else if(Storage.isActive()) {
+            //     if(this.ref.transfer(sotrage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            //         this.ref.moveTo(storage, {visualizePathStyle:  {stroke: '#ffffff'}});
+            //     }
+            // }
+
+            // else {
+            //     if(this.ref.upgradeController(this.ref.room.controller) == ERR_NOT_IN_RANGE) {
+            //         this.ref.moveTo(this.ref.room.controller);
+            //     }
+            // }
+
+  }
+}
 class Miner extends Gatherer {
   constructor(ref, colony) {
     super(ref, colony)
@@ -452,7 +507,8 @@ class Spawn extends Entity {
 // spawnCreep(info, options) {
   spawnCreep(info) {
     // this.colony = colony
-    let newName = Game.time
+    let totalCreeps = Object.keys(Game.creeps).length;
+    let newName = Game.time;
     // if (!options) options = {}
     // if (!options.memory) options.memory = {}
 
@@ -461,13 +517,19 @@ class Spawn extends Entity {
     // options.memory.role = creepClass.name
     // options.memory.colony = this.colony.name
 
+    // if(info == 'Harvester') {
+    //   this.ref.spawnCreep([WORK,CARRY,MOVE],
+    //     'Harvester' + newName,
+    //     { memory: { role: 'Harvester', colony: this.colony.name, working: false}})
+    // }
+
     if(info === 'Miner') {
       if(this.ref.room.energyAvailable >= 600) {
         this.ref.spawnCreep([WORK,WORK,WORK,WORK,WORK,MOVE,MOVE],
           'Miner ' + newName,
           { memory: { role: 'Miner' , colony: this.colony.name, working: false}})
       }
-      else {
+      else if(totalCreeps >0) {
         this.ref.spawnCreep([WORK,WORK,MOVE],
           'Miner ' + newName,
           { memory: { role: 'Miner' , colony: this.colony.name, working: false}})
@@ -566,7 +628,7 @@ class Config {
   constructor() {}
 
   static get COLONIES() {
-    return ['Spawn-W1N8']
+    return ['Spawn-W3N7']
   }
 
   static get ROLES() {

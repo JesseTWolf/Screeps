@@ -108,6 +108,7 @@ class Colony {
     // }
 
     // if(totalCreeps == 0) {
+    // if(harvesterFlag) {
     //   this.spawn.spawnCreep('Harvester')
     // }
 

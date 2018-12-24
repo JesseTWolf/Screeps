@@ -12,7 +12,8 @@ class Spawn extends Entity {
 // spawnCreep(info, options) {
   spawnCreep(info) {
     // this.colony = colony
-    let newName = Game.time
+    let totalCreeps = Object.keys(Game.creeps).length;
+    let newName = Game.time;
     // if (!options) options = {}
     // if (!options.memory) options.memory = {}
 
@@ -21,13 +22,19 @@ class Spawn extends Entity {
     // options.memory.role = creepClass.name
     // options.memory.colony = this.colony.name
 
+    // if(info == 'Harvester') {
+    //   this.ref.spawnCreep([WORK,CARRY,MOVE],
+    //     'Harvester' + newName,
+    //     { memory: { role: 'Harvester', colony: this.colony.name, working: false}})
+    // }
+
     if(info === 'Miner') {
       if(this.ref.room.energyAvailable >= 600) {
         this.ref.spawnCreep([WORK,WORK,WORK,WORK,WORK,MOVE,MOVE],
           'Miner ' + newName,
           { memory: { role: 'Miner' , colony: this.colony.name, working: false}})
       }
-      else {
+      else if(totalCreeps >0) {
         this.ref.spawnCreep([WORK,WORK,MOVE],
           'Miner ' + newName,
           { memory: { role: 'Miner' , colony: this.colony.name, working: false}})

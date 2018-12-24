@@ -2,7 +2,7 @@ class Config {
   constructor() {}
 
   static get COLONIES() {
-    return ['Spawn-W1N8']
+    return ['Spawn-W3N7']
   }
 
   static get ROLES() {

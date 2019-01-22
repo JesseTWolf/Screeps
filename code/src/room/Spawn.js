@@ -22,11 +22,11 @@ class Spawn extends Entity {
     // options.memory.role = creepClass.name
     // options.memory.colony = this.colony.name
 
-    // if(info == 'Harvester') {
-    //   this.ref.spawnCreep([WORK,CARRY,MOVE],
-    //     'Harvester' + newName,
-    //     { memory: { role: 'Harvester', colony: this.colony.name, working: false}})
-    // }
+    if(info == 'Harvester') {
+      this.ref.spawnCreep([WORK,CARRY,MOVE],
+        'Harvester' + newName,
+        { memory: { role: 'Harvester', colony: this.colony.name, working: false}})
+    }
 
     if(info === 'Miner') {
       if(this.ref.room.energyAvailable >= 600) {

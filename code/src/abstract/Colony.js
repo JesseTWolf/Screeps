@@ -107,13 +107,13 @@ class Colony {
     //     console.log('Room "' +name+'" has ' +Game.rooms[this.colony].energyAvailable+' energy');
     // }
 
-    // if(totalCreeps == 0) {
+    if(totalCreeps == 0) {
     // if(harvesterFlag) {
-    //   this.spawn.spawnCreep('Harvester')
-    // }
+      this.spawn.spawnCreep('Harvester')
+    }
 
-    // else if(minerFlag) {
-    if(minerFlag) {
+    else if(minerFlag) {
+    // if(minerFlag) {
       this.spawn.spawnCreep('Miner')
     }
 

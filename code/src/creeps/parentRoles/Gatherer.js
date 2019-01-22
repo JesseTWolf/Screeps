@@ -26,7 +26,7 @@ class Gatherer extends Creep {
         this.ref.say('💧')
     }
 
-    else if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+    if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
       this.ref.moveTo(container)
       this.ref.say('⛋')
     }

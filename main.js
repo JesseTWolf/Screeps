@@ -107,13 +107,13 @@ class Colony {
     //     console.log('Room "' +name+'" has ' +Game.rooms[this.colony].energyAvailable+' energy');
     // }
 
-    // if(totalCreeps == 0) {
+    if(totalCreeps == 0) {
     // if(harvesterFlag) {
-    //   this.spawn.spawnCreep('Harvester')
-    // }
+      this.spawn.spawnCreep('Harvester')
+    }
 
-    // else if(minerFlag) {
-    if(minerFlag) {
+    else if(minerFlag) {
+    // if(minerFlag) {
       this.spawn.spawnCreep('Miner')
     }
 
@@ -231,7 +231,7 @@ class Gatherer extends Creep {
         this.ref.say('💧')
     }
 
-    else if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+    if(this.ref.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
       this.ref.moveTo(container)
       this.ref.say('⛋')
     }
@@ -517,11 +517,11 @@ class Spawn extends Entity {
     // options.memory.role = creepClass.name
     // options.memory.colony = this.colony.name
 
-    // if(info == 'Harvester') {
-    //   this.ref.spawnCreep([WORK,CARRY,MOVE],
-    //     'Harvester' + newName,
-    //     { memory: { role: 'Harvester', colony: this.colony.name, working: false}})
-    // }
+    if(info == 'Harvester') {
+      this.ref.spawnCreep([WORK,CARRY,MOVE],
+        'Harvester' + newName,
+        { memory: { role: 'Harvester', colony: this.colony.name, working: false}})
+    }
 
     if(info === 'Miner') {
       if(this.ref.room.energyAvailable >= 600) {
@@ -628,7 +628,7 @@ class Config {
   constructor() {}
 
   static get COLONIES() {
-    return ['Spawn-W3N7']
+    return ['Spawn-W1N8']
   }
 
   static get ROLES() {

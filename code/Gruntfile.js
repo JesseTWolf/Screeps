@@ -15,7 +15,7 @@ module.exports = function(grunt) {
           'src/creeps/parentRoles/*.js',
           'src/creeps/roles/**/*.js',
           'src/room/**/*.js',
-          'src/Config.js',
+          'src/config.js',
           'src/main.js'
         ],
         dest: '../main.js'

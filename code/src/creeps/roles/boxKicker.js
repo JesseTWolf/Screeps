@@ -1,4 +1,4 @@
-var roleHarvester = {
+var roleBoxKicker = {
     /** @param {Creep} creep **/
     run: function(creep) {
         let currentCapacity = Game.spawns['spawnW5N8'].room.energyAvailable;
@@ -25,18 +25,11 @@ var roleHarvester = {
         }
         else if(creep.memory.working == false) {
 
-            /*
-            // Basic bitch setup
-            var sources = creep.room.find(FIND_SOURCES);
-            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
-            }
-            */
             var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > 0
             });
-            if(containers && creep.withdraw(containers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(containers[0]);
+            if(containers && creep.withdraw(containers, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(containers);
             }    
             else {
                 const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
@@ -44,15 +37,6 @@ var roleHarvester = {
                     if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target);
                     }
-                }
-            }
-
-            var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'miner');
-
-            if(containers == null && miners == null) {
-                var sources = creep.room.find(FIND_SOURCES);
-                if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(sources[0]);
                 }
             }
             

@@ -1,8 +1,8 @@
 const maxNumHarvesters = 2;
-const maxNumUpgraders = 2;
+const maxNumUpgraders = 1;
 const maxNumBuilders = 1;
 const maxNumMiners = 2;
-const maxNumBoxKickers = 3;
+const maxNumBoxKickers = 2;
 const maxNumDefenders = 2;
 
 const controlledRooms = ["W5N8"];
@@ -52,6 +52,8 @@ let monster = [
   MOVE,
 ];
 
+// Real basic miner uses up 300
+let realBasicMiner = [WORK, WORK, MOVE];
 // Basic miner uses up 600
 let basicMiner = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE];
 
@@ -118,18 +120,22 @@ function spawnLogic(room, role) {
   if (energyAvailable >= 500) {
     body = level2;
   }
-  // if (energyAvailable >= 750) {
-  //   body = level3;
-  // }
+  if (energyAvailable >= 750) {
+    body = level3;
+  }
   // if (energyAvailable >= 1250) {
   //   body = monster;
   // }
-  // if (role == "miner") {
-  //   body = basicMiner;
-  // }
+  if (role == "miner") {
+    if (energyAvailable >= 600) {
+      body = basicMiner;
+    } else {
+      body = realBasicMiner;
+    }
+  }
 
   Game.spawns[room.name].spawnCreep(body, newName, {
-    memory: { role: role },
+    memory: { role: role, working: true },
   });
 }
 
@@ -163,13 +169,25 @@ function roomLoop(room) {
     (creep) => creep.memory.role == "builder" && creep.room.name == room.name
   );
 
+  const miners = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "miner" && creep.room.name == room.name
+  );
+
+  const boxKickers = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "boxKicker" && creep.room.name == room.name
+  );
+
   // TODO: Update this to search within room instead
   const tower = Game.getObjectById("63c7df8e8537bd003a0cf889");
   if (tower) {
     const closestDamagedStructure = tower.pos.findClosestByRange(
       FIND_STRUCTURES,
       {
-        filter: (structure) => structure.hits < structure.hitsMax,
+        filter: (structure) =>
+          structure.hits < structure.hitsMax &&
+          structure.structureType != STRUCTURE_WALL,
       }
     );
     if (closestDamagedStructure) {
@@ -182,43 +200,38 @@ function roomLoop(room) {
     }
   }
 
-  if (harvesters.length < 2) {
-    var newName = "Harvester" + Game.time;
-    // console.log("Spawning new harvester: " + newName);
-    Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
-      memory: { role: "harvester" },
-    });
-  } else if (upgraders.length < 2) {
-    var newName = "Upgrader" + Game.time;
-    // console.log("Spawning new upgrader: " + newName);
-    Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
-      memory: { role: "upgrader" },
-    });
-  } else if (builders.length < 1) {
-    var newName = "Builder" + Game.time;
-    // console.log("Spawning new builder: " + newName);
-    Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
-      memory: { role: "builder" },
-    });
-  }
+  // if (harvesters.length < maxNumHarvesters) {
+  //   var newName = "Harvester" + Game.time;
+  //   // console.log("Spawning new harvester: " + newName);
+  //   Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
+  //     memory: { role: "harvester" },
+  //   });
+  // } else if (upgraders.length < maxNumUpgraders) {
+  //   var newName = "Upgrader" + Game.time;
+  //   // console.log("Spawning new upgrader: " + newName);
+  //   Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
+  //     memory: { role: "upgrader" },
+  //   });
+  // } else if (builders.length < maxNumBuilders) {
+  //   var newName = "Builder" + Game.time;
+  //   // console.log("Spawning new builder: " + newName);
+  //   Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
+  //     memory: { role: "builder" },
+  //   });
+  // }
 
   // // If we get wiped make 2 harvesters first
-  // if (totalNumberCreeps < 2) {
-  //   spawnLogic(room, "harvester");
-  // } else if (harvesters.length < maxNumHarvesters) {
-  //   spawnLogic(room, "harvester");
-  // }
-  // // else if (minerCampingSpots.length < maxNumMiners) {
-  // // spawnLogic(room, "miner");
-  // // }
-  // // else if (boxKickers.length < maxNumBoxKickers) {
-  // //   // spawnLogic(room.name, "boxKicker");
-  // // }
-  // else if (upgraders.length < maxNumUpgraders) {
-  //   spawnLogic(room, "upgrader");
-  // } else if (builders.length < maxNumBuilders) {
-  //   spawnLogic(room, "builder");
-  // }
+  if (totalNumberCreeps < 2) {
+    spawnLogic(room, "harvester");
+  } else if (miners.length < maxNumMiners && boxKickers != 0) {
+    spawnLogic(room, "miner");
+  } else if (boxKickers.length < maxNumBoxKickers) {
+    spawnLogic(room, "boxKicker");
+  } else if (upgraders.length < maxNumUpgraders) {
+    spawnLogic(room, "upgrader");
+  } else if (builders.length < maxNumBuilders) {
+    spawnLogic(room, "builder");
+  }
 
   if (Game.spawns[room.name].spawning) {
     const spawningCreep = Game.creeps[Game.spawns[room.name].spawning.name];
@@ -255,6 +268,12 @@ module.exports.loop = function () {
     }
     if (creep.memory.role == "builder") {
       roleBuilder.run(creep);
+    }
+    if (creep.memory.role == "miner") {
+      roleMiner.run(creep);
+    }
+    if (creep.memory.role == "boxKicker") {
+      roleBoxKicker.run(creep);
     }
   }
 };

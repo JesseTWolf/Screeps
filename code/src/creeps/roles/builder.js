@@ -20,9 +20,22 @@ var roleBuilder = {
         }
       }
     } else {
-      var sources = creep.room.find(FIND_SOURCES);
-      if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+      var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (s) =>
+          s.structureType == STRUCTURE_CONTAINER &&
+          s.store[RESOURCE_ENERGY] > 0,
+      });
+      const droppedResources = creep.pos.findClosestByRange(
+        FIND_DROPPED_RESOURCES
+      );
+      if (droppedResources.length != 0) {
+        if (creep.pickup(droppedResources) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(droppedResources);
+        }
+      } else {
+        if (creep.withdraw(containers, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(containers);
+        }
       }
     }
   },

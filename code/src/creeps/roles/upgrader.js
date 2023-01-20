@@ -17,10 +17,33 @@ var roleUpgrader = {
         });
       }
     } else {
-      var sources = creep.room.find(FIND_SOURCES);
-      if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+      const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+      if (target) {
+        if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(target);
+        }
+      } else {
+        var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+          filter: (s) =>
+            s.structureType == STRUCTURE_CONTAINER &&
+            s.store[RESOURCE_ENERGY] > 0,
+        });
+        if (
+          containers &&
+          creep.withdraw(containers, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
+        ) {
+          creep.moveTo(containers);
+        }
       }
+
+      if (creep.store[RESOURCE_ENERGY] == creep.store.getCapacity()) {
+        creep.memory.upgrading = true;
+      }
+
+      // var sources = creep.room.find(FIND_SOURCES);
+      // if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+      //   creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+      // }
     }
   },
 };

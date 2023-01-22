@@ -16,6 +16,16 @@ var roleUpgrader = {
           visualizePathStyle: { stroke: "#ffffff" },
         });
       }
+      if (creep.room.controller.sign.username != "Jesse") {
+        if (
+          creep.signController(
+            creep.room.controller,
+            "Keep your filthy creeps outta here Delphes :P"
+          ) == ERR_NOT_IN_RANGE
+        ) {
+          creep.moveTo(creep.room.controller);
+        }
+      }
     } else {
       const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
       if (target) {

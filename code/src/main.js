@@ -1,6 +1,6 @@
 const maxNumHarvesters = 2;
 const maxNumUpgraders = 1;
-const maxNumBuilders = 1;
+const maxNumBuilders = 2;
 const maxNumMiners = 2;
 const maxNumBoxKickers = 2;
 const maxNumDefenders = 2;
@@ -106,6 +106,21 @@ function printTheThings(room) {
     color: "green",
     font: 0.8,
   });
+
+  const boxKickers = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "boxKicker"
+  );
+  room.visual.text("BoxKickers:  " + boxKickers.length, 46, 5, {
+    color: "green",
+    font: 0.8,
+  });
+
+  const miners = _.filter(Game.creeps, (creep) => creep.memory.role == "miner");
+  room.visual.text("Miners:  " + miners.length, 46, 6, {
+    color: "green",
+    font: 0.8,
+  });
 }
 
 function spawnLogic(room, role) {
@@ -120,9 +135,9 @@ function spawnLogic(room, role) {
   if (energyAvailable >= 500) {
     body = level2;
   }
-  if (energyAvailable >= 750) {
-    body = level3;
-  }
+  // if (energyAvailable >= 750) {
+  //   body = level3;
+  // }
   // if (energyAvailable >= 1250) {
   //   body = monster;
   // }
@@ -134,9 +149,20 @@ function spawnLogic(room, role) {
     }
   }
 
-  Game.spawns[room.name].spawnCreep(body, newName, {
-    memory: { role: role, working: true },
-  });
+  if (role != "scoutHarvester") {
+    Game.spawns[room.name].spawnCreep(body, newName, {
+      memory: { role: role, working: true },
+    });
+  } else {
+    Game.spawns[room.name].spawnCreep(body, newName, {
+      memory: {
+        role: role,
+        working: true,
+        workRoom: "W4N8",
+        homeRoom: room.name,
+      },
+    });
+  }
 }
 
 function roomLoop(room) {
@@ -179,48 +205,41 @@ function roomLoop(room) {
     (creep) => creep.memory.role == "boxKicker" && creep.room.name == room.name
   );
 
-  // TODO: Update this to search within room instead
-  const tower = Game.getObjectById("63c7df8e8537bd003a0cf889");
-  if (tower) {
-    const closestDamagedStructure = tower.pos.findClosestByRange(
-      FIND_STRUCTURES,
-      {
-        filter: (structure) =>
-          structure.hits < structure.hitsMax &&
-          structure.structureType != STRUCTURE_WALL,
+  const scoutHarvesters = _.filter(
+    Game.creeps,
+    (creep) =>
+      creep.memory.role == "scoutHarvester" && creep.room.name == room.name
+  );
+
+  const towers = Game.spawns[room.name].room.find(FIND_STRUCTURES, {
+    filter: { structureType: STRUCTURE_TOWER },
+  });
+
+  // For each room in the list of controlled rooms do...
+  towers.forEach(function (tower) {
+    // console.log(tower.id);
+    const towerObject = Game.getObjectById(tower.id);
+    if (tower) {
+      const closestDamagedStructure = tower.pos.findClosestByRange(
+        FIND_STRUCTURES,
+        {
+          filter: (structure) =>
+            structure.hits < structure.hitsMax &&
+            structure.structureType != STRUCTURE_WALL,
+        }
+      );
+      if (closestDamagedStructure) {
+        tower.repair(closestDamagedStructure);
       }
-    );
-    if (closestDamagedStructure) {
-      tower.repair(closestDamagedStructure);
+
+      const closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+      if (closestHostile) {
+        tower.attack(closestHostile);
+      }
     }
+  });
 
-    const closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-    if (closestHostile) {
-      tower.attack(closestHostile);
-    }
-  }
-
-  // if (harvesters.length < maxNumHarvesters) {
-  //   var newName = "Harvester" + Game.time;
-  //   // console.log("Spawning new harvester: " + newName);
-  //   Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
-  //     memory: { role: "harvester" },
-  //   });
-  // } else if (upgraders.length < maxNumUpgraders) {
-  //   var newName = "Upgrader" + Game.time;
-  //   // console.log("Spawning new upgrader: " + newName);
-  //   Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
-  //     memory: { role: "upgrader" },
-  //   });
-  // } else if (builders.length < maxNumBuilders) {
-  //   var newName = "Builder" + Game.time;
-  //   // console.log("Spawning new builder: " + newName);
-  //   Game.spawns["W5N8"].spawnCreep([WORK, CARRY, MOVE, MOVE], newName, {
-  //     memory: { role: "builder" },
-  //   });
-  // }
-
-  // // If we get wiped make 2 harvesters first
+  // If we get wiped make 2 harvesters first
   if (totalNumberCreeps < 2) {
     spawnLogic(room, "harvester");
   } else if (miners.length < maxNumMiners && boxKickers != 0) {

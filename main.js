@@ -179,25 +179,39 @@ var roleKamikaze = {
   /** @param {Creep} creep **/
   run: function (creep) {
     // If creep is working and not in the work room move to it.
-    if (creep.memory.working) {
-      if (creep.room.name != creep.memory.workRoom) {
-        const exitDir = Game.map.findExit(creep.room, creep.memory.workRoom);
-        const exit = creep.pos.findClosestByRange(exitDir);
-        creep.moveTo(exit, { visualizePathStyle: { stroke: "#ff0000" } });
-      } else if (creep.store.getFreeCapacity() > 0) {
-        var sources = creep.room.find(FIND_SOURCES);
+    // if (creep.memory.working) {
+    ceaseFire = true;
 
-        if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(sources[0], {
-            visualizePathStyle: { stroke: "#ffaa00" },
-          });
+    if (creep.room.name != creep.memory.workRoom) {
+      // const exitDir = Game.map.findExit(creep.room, creep.memory.workRoom);
+      // const exit = creep.pos.findClosestByRange(exitDir);
+      // creep.moveTo(exit, { visualizePathStyle: { stroke: "#ff0000" } });
+      creep.moveTo(new RoomPosition(8, 35, creep.memory.workRoom));
+    } else {
+      const hostiles = creep.room.find(FIND_HOSTILE_CREEPS);
+
+      if (hostiles.length) {
+        const target = hostiles[0];
+
+        if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(target);
+        } else {
+          creep.attack(target);
         }
+
+        // creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        // if (target) {
+        //   creep.attack(target);
+        // }
+      } else {
+        creep.moveTo(Game.flags["SkirmishZone"]);
       }
     }
+    // }
   },
 };
 
-module.exports = roleScoutHarvester;
+module.exports = roleKamikaze;
 var roleBoxKicker = {
   /** @param {Creep} creep **/
   run: function (creep) {
@@ -418,6 +432,7 @@ const maxNumMiners = 2;
 const maxNumBoxKickers = 3;
 const maxNumDefenders = 2;
 const maxScoutHarvesters = 8;
+const maxKamikazes = 1;
 
 const numHarvestersPerRoom = 2;
 
@@ -467,6 +482,26 @@ let monster = [
   MOVE,
   MOVE,
   MOVE,
+];
+
+// Uses up 760 energy
+let simpleAttacker = [
+  TOUGH,
+  TOUGH,
+  TOUGH,
+  TOUGH,
+  MOVE,
+  MOVE,
+  MOVE,
+  MOVE,
+  MOVE,
+  MOVE,
+  MOVE,
+  MOVE,
+  ATTACK,
+  ATTACK,
+  ATTACK,
+  ATTACK,
 ];
 
 // Real basic miner uses up 300
@@ -558,16 +593,18 @@ function spawnLogic(room, role, workRoomName) {
   let body;
   if (energyAvailable >= 300) {
     body = baby;
-  }
-  if (energyAvailable >= 500) {
+  } else if (energyAvailable >= 500) {
     body = level2;
-  }
-  if (energyAvailable >= 750) {
+  } else if (energyAvailable >= 750) {
     body = level3;
   }
-  // if (energyAvailable >= 1250) {
-  //   body = monster;
-  // }
+  if (role == "kamikaze") {
+    if (energyAvailable >= 765) {
+      body = simpleAttacker;
+    } else {
+      return;
+    }
+  }
   if (role == "miner") {
     if (energyAvailable >= 600) {
       body = basicMiner;
@@ -576,11 +613,7 @@ function spawnLogic(room, role, workRoomName) {
     }
   }
 
-  if (role != "scoutHarvester") {
-    Game.spawns[room.name].spawnCreep(body, newName, {
-      memory: { role: role, working: true },
-    });
-  } else {
+  if (role == "scoutHarvester") {
     Game.spawns[room.name].spawnCreep(body, newName, {
       memory: {
         role: role,
@@ -588,6 +621,19 @@ function spawnLogic(room, role, workRoomName) {
         workRoom: workRoomName,
         homeRoom: room.name,
       },
+    });
+  } else if (role == "kamikaze") {
+    Game.spawns[room.name].spawnCreep(body, newName, {
+      memory: {
+        role: role,
+        working: true,
+        workRoom: workRoomName,
+        homeRoom: room.name,
+      },
+    });
+  } else {
+    Game.spawns[room.name].spawnCreep(body, newName, {
+      memory: { role: role, working: true },
     });
   }
 }
@@ -667,6 +713,11 @@ function roomLoop(room) {
       creep.memory.workRoom == miningRooms[3]
   );
 
+  const kamikazes = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "kamikaze"
+  );
+
   const towers = Game.spawns[room.name].room.find(FIND_STRUCTURES, {
     filter: { structureType: STRUCTURE_TOWER },
   });
@@ -720,7 +771,10 @@ function roomLoop(room) {
     } else if (scoutHarvestersRoom3.length < numHarvestersPerRoom) {
       spawnLogic(room, "scoutHarvester", miningRooms[3]);
     }
+  } else if (kamikazes.length < maxKamikazes && energyAvailable >= 760) {
+    spawnLogic(room, "kamikaze", skirmishRoom[0]);
   }
+
   if (Game.spawns[room.name].spawning) {
     const spawningCreep = Game.creeps[Game.spawns[room.name].spawning.name];
     Game.spawns[room.name].room.visual.text(
@@ -765,6 +819,9 @@ module.exports.loop = function () {
     }
     if (creep.memory.role == "scoutHarvester") {
       roleScoutHarvester.run(creep);
+    }
+    if (creep.memory.role == "kamikaze") {
+      roleKamikaze.run(creep);
     }
   }
 };

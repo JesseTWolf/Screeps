@@ -2,12 +2,16 @@ const maxNumHarvesters = 2;
 const maxNumUpgraders = 1;
 const maxNumBuilders = 2;
 const maxNumMiners = 2;
-const maxNumBoxKickers = 2;
+const maxNumBoxKickers = 3;
 const maxNumDefenders = 2;
+const maxScoutHarvesters = 8;
+
+const numHarvestersPerRoom = 2;
 
 const controlledRooms = ["W5N8"];
-const minerCampingSpots = [["14,14", "15,13"]];
+const miningRooms = ["W4N8", "W5N9", "W6N8", "W5N7"];
 const delphesRooms = ["W3N7"];
+const skirmishRoom = ["W4N9"];
 
 // Creep sizing
 let baby = [WORK, CARRY, MOVE, MOVE];
@@ -121,12 +125,22 @@ function printTheThings(room) {
     color: "green",
     font: 0.8,
   });
+
+  const scoutHarvesters = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "scoutHarvester"
+  );
+  room.visual.text("Travelers:  " + scoutHarvesters.length, 46, 7, {
+    color: "green",
+    font: 0.8,
+  });
 }
 
-function spawnLogic(room, role) {
+function spawnLogic(room, role, workRoomName) {
   const energyAvailable = room.energyAvailable;
 
-  const newName = role + Game.time;
+  const newName =
+    role + Game.time + (workRoomName == undefined ? room.name : workRoomName);
 
   let body;
   if (energyAvailable >= 300) {
@@ -135,9 +149,9 @@ function spawnLogic(room, role) {
   if (energyAvailable >= 500) {
     body = level2;
   }
-  // if (energyAvailable >= 750) {
-  //   body = level3;
-  // }
+  if (energyAvailable >= 750) {
+    body = level3;
+  }
   // if (energyAvailable >= 1250) {
   //   body = monster;
   // }
@@ -158,7 +172,7 @@ function spawnLogic(room, role) {
       memory: {
         role: role,
         working: true,
-        workRoom: "W4N8",
+        workRoom: workRoomName,
         homeRoom: room.name,
       },
     });
@@ -208,7 +222,36 @@ function roomLoop(room) {
   const scoutHarvesters = _.filter(
     Game.creeps,
     (creep) =>
-      creep.memory.role == "scoutHarvester" && creep.room.name == room.name
+      creep.memory.role == "scoutHarvester" &&
+      creep.memory.homeRoom == room.name
+  );
+
+  const scoutHarvestersRoom0 = _.filter(
+    Game.creeps,
+    (creep) =>
+      creep.memory.role == "scoutHarvester" &&
+      creep.memory.workRoom == miningRooms[0]
+  );
+
+  const scoutHarvestersRoom1 = _.filter(
+    Game.creeps,
+    (creep) =>
+      creep.memory.role == "scoutHarvester" &&
+      creep.memory.workRoom == miningRooms[1]
+  );
+
+  const scoutHarvestersRoom2 = _.filter(
+    Game.creeps,
+    (creep) =>
+      creep.memory.role == "scoutHarvester" &&
+      creep.memory.workRoom == miningRooms[2]
+  );
+
+  const scoutHarvestersRoom3 = _.filter(
+    Game.creeps,
+    (creep) =>
+      creep.memory.role == "scoutHarvester" &&
+      creep.memory.workRoom == miningRooms[3]
   );
 
   const towers = Game.spawns[room.name].room.find(FIND_STRUCTURES, {
@@ -250,8 +293,21 @@ function roomLoop(room) {
     spawnLogic(room, "upgrader");
   } else if (builders.length < maxNumBuilders) {
     spawnLogic(room, "builder");
+  } else if (
+    scoutHarvesters.length < maxScoutHarvesters &&
+    energyAvailable > 800
+  ) {
+    // If number of scout harvesters in room 0 are less than 5 make more for that room.
+    if (scoutHarvestersRoom0.length < numHarvestersPerRoom) {
+      spawnLogic(room, "scoutHarvester", miningRooms[0]);
+    } else if (scoutHarvestersRoom1.length < numHarvestersPerRoom) {
+      spawnLogic(room, "scoutHarvester", miningRooms[1]);
+    } else if (scoutHarvestersRoom2.length < numHarvestersPerRoom) {
+      spawnLogic(room, "scoutHarvester", miningRooms[2]);
+    } else if (scoutHarvestersRoom3.length < numHarvestersPerRoom) {
+      spawnLogic(room, "scoutHarvester", miningRooms[3]);
+    }
   }
-
   if (Game.spawns[room.name].spawning) {
     const spawningCreep = Game.creeps[Game.spawns[room.name].spawning.name];
     Game.spawns[room.name].room.visual.text(
@@ -267,7 +323,7 @@ module.exports.loop = function () {
   for (const name in Memory.creeps) {
     if (!Game.creeps[name]) {
       delete Memory.creeps[name];
-      console.log("Clearing non-existing creep memory:", name);
+      // console.log("Clearing non-existing creep memory:", name);
     }
   }
 
@@ -293,6 +349,9 @@ module.exports.loop = function () {
     }
     if (creep.memory.role == "boxKicker") {
       roleBoxKicker.run(creep);
+    }
+    if (creep.memory.role == "scoutHarvester") {
+      roleScoutHarvester.run(creep);
     }
   }
 };

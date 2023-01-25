@@ -27,10 +27,14 @@ var roleUpgrader = {
         }
       }
     } else {
-      const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
-      if (target) {
-        if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(target);
+      const storage = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+        filter: (s) =>
+          s.structureType == STRUCTURE_STORAGE &&
+          s.store.getUsedCapacity[RESOURCE_ENERGY] > 0,
+      });
+      if (storage) {
+        if (creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(storage);
         }
       } else {
         var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {

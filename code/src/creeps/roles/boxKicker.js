@@ -10,8 +10,8 @@ var roleBoxKicker = {
           return (
             (structure.structureType == STRUCTURE_EXTENSION ||
               structure.structureType == STRUCTURE_SPAWN ||
-              (structure.structureType == STRUCTURE_TOWER &&
-                structure.energy < 200)) &&
+              structure.structureType == STRUCTURE_TOWER) &&
+            // structure.energy < 200)) &&
             structure.energy < structure.energyCapacity
           );
         },

@@ -29,6 +29,15 @@ var roleKamikaze = {
       } else {
         creep.moveTo(Game.flags["SkirmishZone"]);
       }
+
+      if (!hostiles.length && creep.room.controller.sign.username != "Jesse") {
+        if (
+          creep.signController(creep.room.controller, "Come get some :P") ==
+          ERR_NOT_IN_RANGE
+        ) {
+          creep.moveTo(creep.room.controller);
+        }
+      }
     }
     // }
   },

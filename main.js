@@ -43,42 +43,43 @@ class Creep {
 var roleBoxKicker = {
   /** @param {Creep} creep **/
   run: function (creep) {
-    // let currentCapacity = creep.room.energyAvailable;
-    // let maxCapacity = creep.room.energyCapacity;
-
     if (creep.memory.working) {
       let targets = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (structure) => {
           return (
             (structure.structureType == STRUCTURE_EXTENSION ||
-              structure.structureType == STRUCTURE_SPAWN ||
               structure.structureType == STRUCTURE_TOWER) &&
-            // structure.energy < 200)) &&
             structure.energy < structure.energyCapacity
           );
         },
       });
 
       if (targets) {
-        if (creep.transfer(targets, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+        if (creep.transfer(targets, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           creep.moveTo(targets, { visualizePathStyle: { stroke: "#fffff" } });
-      } else {
-        if (
-          creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE
-        ) {
-          creep.moveTo(creep.room.controller);
         }
       }
       if (creep.store[RESOURCE_ENERGY] == 0) {
         creep.memory.working = false;
       }
     } else if (!creep.memory.working) {
+      var storages = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (s) =>
+          s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0,
+      });
+
       var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (s) =>
           s.structureType == STRUCTURE_CONTAINER &&
           s.store[RESOURCE_ENERGY] > 0,
       });
+
       if (
+        storages &&
+        creep.withdraw(storages, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
+      ) {
+        creep.moveTo(storages);
+      } else if (
         containers &&
         creep.withdraw(containers, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
       ) {
@@ -120,8 +121,37 @@ var roleBuilder = {
             visualizePathStyle: { stroke: "#ffffff" },
           });
         }
+      } else {
+        const closestDamagedStructure = creep.pos.findClosestByRange(
+          FIND_STRUCTURES,
+          {
+            filter: (structure) =>
+              (structure.hits < structure.hitsMax &&
+                structure.structureType != STRUCTURE_WALL) ||
+              (structure.structureType == STRUCTURE_WALL &&
+                structure.hits == 1),
+          }
+        );
+        if (closestDamagedStructure) {
+          if (creep.repair(closestDamagedStructure) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(closestDamagedStructure);
+          }
+        } else if (
+          creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE
+        ) {
+          creep.moveTo(creep.room.controller, {
+            visualizePathStyle: { stroke: "#ffffff" },
+          });
+        }
       }
     } else {
+      var storages = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (s) =>
+          (s.structureType == STRUCTURE_STORAGE ||
+            s.structureType == STRUCTURE_LINK) &&
+          s.store[RESOURCE_ENERGY] > 0,
+      });
+
       var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (s) =>
           s.structureType == STRUCTURE_CONTAINER &&
@@ -130,7 +160,13 @@ var roleBuilder = {
       const droppedResources = creep.pos.findClosestByRange(
         FIND_DROPPED_RESOURCES
       );
-      if (droppedResources.length != 0) {
+
+      if (
+        storages &&
+        creep.withdraw(storages, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
+      ) {
+        creep.moveTo(storages);
+      } else if (droppedResources) {
         if (creep.pickup(droppedResources) == ERR_NOT_IN_RANGE) {
           creep.moveTo(droppedResources);
         }
@@ -206,71 +242,97 @@ var roleKamikaze = {
       } else {
         creep.moveTo(Game.flags["SkirmishZone"]);
       }
+
+      if (!hostiles.length && creep.room.controller.sign.username != "Jesse") {
+        if (
+          creep.signController(creep.room.controller, "Come get some :P") ==
+          ERR_NOT_IN_RANGE
+        ) {
+          creep.moveTo(creep.room.controller);
+        }
+      }
     }
     // }
   },
 };
 
 module.exports = roleKamikaze;
-var roleBoxKicker = {
+var roleLegless = {
   /** @param {Creep} creep **/
   run: function (creep) {
-    // let currentCapacity = creep.room.energyAvailable;
-    // let maxCapacity = creep.room.energyCapacity;
-
-    if (creep.memory.working) {
-      let targets = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-        filter: (structure) => {
-          return (
-            (structure.structureType == STRUCTURE_SPAWN ||
-              structure.structureType == STRUCTURE_TOWER) &&
-            // structure.energy < 200)) &&
-            structure.energy < structure.energyCapacity
-          );
-        },
+    if (creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()) {
+      let link = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (structure) => structure.structureType == STRUCTURE_LINK,
       });
 
-      if (targets) {
-        if (creep.transfer(targets, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-          creep.moveTo(targets, { visualizePathStyle: { stroke: "#fffff" } });
-      } else {
-        if (
-          creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE
-        ) {
-          creep.moveTo(creep.room.controller);
-        }
+      if (creep.withdraw(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(link, {
+          visualizePathStyle: { stroke: "#ffff00" },
+        });
       }
-      if (creep.store[RESOURCE_ENERGY] == 0) {
-        creep.memory.working = false;
-      }
-    } else if (!creep.memory.working) {
-      var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-        filter: (s) =>
-          s.structureType == STRUCTURE_CONTAINER &&
-          s.store[RESOURCE_ENERGY] > 0,
+    } else {
+      let storage = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (structure) => structure.structureType == STRUCTURE_STORAGE,
       });
-      if (
-        containers &&
-        creep.withdraw(containers, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
-      ) {
-        creep.moveTo(containers);
-      } else {
-        const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
-        if (target) {
-          if (creep.pickup(target) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target);
-          }
-        }
-      }
 
-      if (creep.store[RESOURCE_ENERGY] == creep.store.getCapacity()) {
-        creep.memory.working = true;
+      if (storage.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+        if (creep.transfer(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(storage, {
+            visualizePathStyle: { stroke: "#ffffff" },
+          });
+        }
       }
     }
   },
 };
 
-module.exports = roleBoxKicker;
+module.exports = roleLegless;
+var roleLinker = {
+  /** @param {Creep} creep **/
+  run: function (creep) {
+    // let currentCapacity = creep.room.energyAvailable;
+    // let maxCapacity = creep.room.energyCapacity;
+
+    if (!creep.memory.containerID) {
+      /** Commented out until I have second linker up and running
+       *  let occupiedContainers = _.filter(
+        Game.creeps,
+        (creep) => creep.memory.role == "linker"
+      ).map((el) => el.memory.containerID);
+
+      let closestContainer = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (structure) =>
+          structure.structureType == STRUCTURE_CONTAINER &&
+          structure.store[RESOURCE_ENERGY] > 0,
+      });
+
+       creep.memory.containerID = closestContainer.id;
+       */
+
+      creep.memory.containerID = "63ca254a20730200730248a8";
+    } else {
+      if (creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()) {
+        let container = Game.getObjectById(creep.memory.containerID);
+
+        if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(container, {
+            visualizePathStyle: { stroke: "#ffff00" },
+          });
+        }
+      } else {
+        let link = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+          filter: (structure) => structure.structureType == STRUCTURE_LINK,
+        });
+
+        if (link.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+          creep.transfer(link, RESOURCE_ENERGY);
+        }
+      }
+    }
+  },
+};
+
+module.exports = roleLinker;
 var roleMiner = {
   /** @param {Creep} creep **/
   run: function (creep) {
@@ -326,7 +388,7 @@ var roleScoutHarvester = {
         var targets = creep.room.find(FIND_STRUCTURES, {
           filter: (structure) => {
             return (
-              structure.structureType == STRUCTURE_EXTENSION &&
+              structure.structureType == STRUCTURE_STORAGE &&
               structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             );
           },
@@ -426,17 +488,20 @@ var roleUpgrader = {
 
 module.exports = roleUpgrader;
 const maxNumHarvesters = 2;
-const maxNumUpgraders = 1;
+const maxNumUpgraders = 2;
 const maxNumBuilders = 2;
 const maxNumMiners = 2;
-const maxNumBoxKickers = 3;
+const maxNumBoxKickers = 2;
 const maxNumDefenders = 2;
 const maxScoutHarvesters = 8;
 const maxKamikazes = 1;
+const maxLinkers = 1;
+const maxLegless = 1;
 
 const numHarvestersPerRoom = 2;
 
 const controlledRooms = ["W5N8"];
+const linkIDs = ["63cd864a7511580039a79be6", "63cd83b04bf53000383a7111"];
 const miningRooms = ["W4N8", "W5N9", "W6N8", "W5N7"];
 const delphesRooms = ["W3N7"];
 const skirmishRoom = ["W4N9"];
@@ -482,6 +547,38 @@ let monster = [
   MOVE,
   MOVE,
   MOVE,
+];
+
+// Uses up 800
+let legless = [
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+];
+
+// Uses up 450
+let superSimpleAttacker = [
+  TOUGH,
+  TOUGH,
+  MOVE,
+  MOVE,
+  MOVE,
+  MOVE,
+  RANGED_ATTACK,
+  ATTACK,
 ];
 
 // Uses up 760 energy
@@ -597,20 +694,29 @@ function spawnLogic(room, role, workRoomName) {
     body = level2;
   } else if (energyAvailable >= 750) {
     body = level3;
+  } else if (energyAvailable >= 1250) {
+    body = monster;
   }
+
   if (role == "kamikaze") {
-    if (energyAvailable >= 765) {
-      body = simpleAttacker;
-    } else {
-      return;
+    if (energyAvailable >= 450) {
+      body = superSimpleAttacker;
     }
-  }
-  if (role == "miner") {
+    // else if (energyAvailable >= 765) {
+    //   body = simpleAttacker;
+    // } else {
+    //   return;
+    // }
+  } else if (role == "miner") {
     if (energyAvailable >= 600) {
       body = basicMiner;
     } else {
       body = realBasicMiner;
     }
+  } else if (role == "legless") {
+    if (energyAvailable >= 800) {
+      body = legless;
+    } else body = [CARRY, CARRY, CARRY, CARRY];
   }
 
   if (role == "scoutHarvester") {
@@ -621,6 +727,7 @@ function spawnLogic(room, role, workRoomName) {
         workRoom: workRoomName,
         homeRoom: room.name,
       },
+      directions: [BOTTOM_LEFT],
     });
   } else if (role == "kamikaze") {
     Game.spawns[room.name].spawnCreep(body, newName, {
@@ -630,10 +737,20 @@ function spawnLogic(room, role, workRoomName) {
         workRoom: workRoomName,
         homeRoom: room.name,
       },
+      directions: [BOTTOM_LEFT],
+    });
+  } else if (role == "legless") {
+    Game.spawns[room.name].spawnCreep(body, newName, {
+      memory: {
+        role: role,
+        working: true,
+      },
+      directions: [BOTTOM_RIGHT],
     });
   } else {
     Game.spawns[room.name].spawnCreep(body, newName, {
       memory: { role: role, working: true },
+      directions: [BOTTOM_LEFT],
     });
   }
 }
@@ -718,26 +835,42 @@ function roomLoop(room) {
     (creep) => creep.memory.role == "kamikaze"
   );
 
+  const linkers = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "linker" && creep.room.name == room.name
+  );
+
+  const legless = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "legless" && creep.room.name == room.name
+  );
+
   const towers = Game.spawns[room.name].room.find(FIND_STRUCTURES, {
     filter: { structureType: STRUCTURE_TOWER },
   });
 
+  const linkFrom = Game.getObjectById(linkIDs[0]);
+
+  const linkTo = Game.getObjectById(linkIDs[1]);
+
+  if (linkFrom.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+    linkFrom.transferEnergy(linkTo);
+  }
+
   // For each room in the list of controlled rooms do...
   towers.forEach(function (tower) {
-    // console.log(tower.id);
-    const towerObject = Game.getObjectById(tower.id);
     if (tower) {
-      const closestDamagedStructure = tower.pos.findClosestByRange(
-        FIND_STRUCTURES,
-        {
-          filter: (structure) =>
-            structure.hits < structure.hitsMax &&
-            structure.structureType != STRUCTURE_WALL,
-        }
-      );
-      if (closestDamagedStructure) {
-        tower.repair(closestDamagedStructure);
-      }
+      // const closestDamagedStructure = tower.pos.findClosestByRange(
+      //   FIND_STRUCTURES,
+      //   {
+      //     filter: (structure) =>
+      //       structure.hits < structure.hitsMax &&
+      //       structure.structureType != STRUCTURE_WALL,
+      //   }
+      // );
+      // if (closestDamagedStructure) {
+      //   tower.repair(closestDamagedStructure);
+      // }
 
       const closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
       if (closestHostile) {
@@ -757,6 +890,10 @@ function roomLoop(room) {
     spawnLogic(room, "upgrader");
   } else if (builders.length < maxNumBuilders) {
     spawnLogic(room, "builder");
+  } else if (linkers.length < maxLinkers) {
+    spawnLogic(room, "linker");
+  } else if (legless.length < maxLegless) {
+    spawnLogic(room, "legless");
   } else if (
     scoutHarvesters.length < maxScoutHarvesters &&
     energyAvailable > 800
@@ -822,6 +959,12 @@ module.exports.loop = function () {
     }
     if (creep.memory.role == "kamikaze") {
       roleKamikaze.run(creep);
+    }
+    if (creep.memory.role == "linker") {
+      roleLinker.run(creep);
+    }
+    if (creep.memory.role == "legless") {
+      roleLegless.run(creep);
     }
   }
 };

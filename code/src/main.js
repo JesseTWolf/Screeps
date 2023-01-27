@@ -1,15 +1,18 @@
 const maxNumHarvesters = 2;
-const maxNumUpgraders = 1;
+const maxNumUpgraders = 2;
 const maxNumBuilders = 2;
 const maxNumMiners = 2;
-const maxNumBoxKickers = 3;
+const maxNumBoxKickers = 2;
 const maxNumDefenders = 2;
 const maxScoutHarvesters = 8;
 const maxKamikazes = 1;
+const maxLinkers = 1;
+const maxLegless = 1;
 
 const numHarvestersPerRoom = 2;
 
 const controlledRooms = ["W5N8"];
+const linkIDs = ["63cd864a7511580039a79be6", "63cd83b04bf53000383a7111"];
 const miningRooms = ["W4N8", "W5N9", "W6N8", "W5N7"];
 const delphesRooms = ["W3N7"];
 const skirmishRoom = ["W4N9"];
@@ -55,6 +58,38 @@ let monster = [
   MOVE,
   MOVE,
   MOVE,
+];
+
+// Uses up 800
+let legless = [
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+  CARRY,
+];
+
+// Uses up 450
+let superSimpleAttacker = [
+  TOUGH,
+  TOUGH,
+  MOVE,
+  MOVE,
+  MOVE,
+  MOVE,
+  RANGED_ATTACK,
+  ATTACK,
 ];
 
 // Uses up 760 energy
@@ -170,20 +205,29 @@ function spawnLogic(room, role, workRoomName) {
     body = level2;
   } else if (energyAvailable >= 750) {
     body = level3;
+  } else if (energyAvailable >= 1250) {
+    body = monster;
   }
+
   if (role == "kamikaze") {
-    if (energyAvailable >= 765) {
-      body = simpleAttacker;
-    } else {
-      return;
+    if (energyAvailable >= 450) {
+      body = superSimpleAttacker;
     }
-  }
-  if (role == "miner") {
+    // else if (energyAvailable >= 765) {
+    //   body = simpleAttacker;
+    // } else {
+    //   return;
+    // }
+  } else if (role == "miner") {
     if (energyAvailable >= 600) {
       body = basicMiner;
     } else {
       body = realBasicMiner;
     }
+  } else if (role == "legless") {
+    if (energyAvailable >= 800) {
+      body = legless;
+    } else body = [CARRY, CARRY, CARRY, CARRY];
   }
 
   if (role == "scoutHarvester") {
@@ -194,6 +238,7 @@ function spawnLogic(room, role, workRoomName) {
         workRoom: workRoomName,
         homeRoom: room.name,
       },
+      directions: [BOTTOM_LEFT],
     });
   } else if (role == "kamikaze") {
     Game.spawns[room.name].spawnCreep(body, newName, {
@@ -203,10 +248,20 @@ function spawnLogic(room, role, workRoomName) {
         workRoom: workRoomName,
         homeRoom: room.name,
       },
+      directions: [BOTTOM_LEFT],
+    });
+  } else if (role == "legless") {
+    Game.spawns[room.name].spawnCreep(body, newName, {
+      memory: {
+        role: role,
+        working: true,
+      },
+      directions: [BOTTOM_RIGHT],
     });
   } else {
     Game.spawns[room.name].spawnCreep(body, newName, {
       memory: { role: role, working: true },
+      directions: [BOTTOM_LEFT],
     });
   }
 }
@@ -291,26 +346,42 @@ function roomLoop(room) {
     (creep) => creep.memory.role == "kamikaze"
   );
 
+  const linkers = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "linker" && creep.room.name == room.name
+  );
+
+  const legless = _.filter(
+    Game.creeps,
+    (creep) => creep.memory.role == "legless" && creep.room.name == room.name
+  );
+
   const towers = Game.spawns[room.name].room.find(FIND_STRUCTURES, {
     filter: { structureType: STRUCTURE_TOWER },
   });
 
+  const linkFrom = Game.getObjectById(linkIDs[0]);
+
+  const linkTo = Game.getObjectById(linkIDs[1]);
+
+  if (linkFrom.store.getFreeCapacity(RESOURCE_ENERGY) == 0) {
+    linkFrom.transferEnergy(linkTo);
+  }
+
   // For each room in the list of controlled rooms do...
   towers.forEach(function (tower) {
-    // console.log(tower.id);
-    const towerObject = Game.getObjectById(tower.id);
     if (tower) {
-      const closestDamagedStructure = tower.pos.findClosestByRange(
-        FIND_STRUCTURES,
-        {
-          filter: (structure) =>
-            structure.hits < structure.hitsMax &&
-            structure.structureType != STRUCTURE_WALL,
-        }
-      );
-      if (closestDamagedStructure) {
-        tower.repair(closestDamagedStructure);
-      }
+      // const closestDamagedStructure = tower.pos.findClosestByRange(
+      //   FIND_STRUCTURES,
+      //   {
+      //     filter: (structure) =>
+      //       structure.hits < structure.hitsMax &&
+      //       structure.structureType != STRUCTURE_WALL,
+      //   }
+      // );
+      // if (closestDamagedStructure) {
+      //   tower.repair(closestDamagedStructure);
+      // }
 
       const closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
       if (closestHostile) {
@@ -330,6 +401,10 @@ function roomLoop(room) {
     spawnLogic(room, "upgrader");
   } else if (builders.length < maxNumBuilders) {
     spawnLogic(room, "builder");
+  } else if (linkers.length < maxLinkers) {
+    spawnLogic(room, "linker");
+  } else if (legless.length < maxLegless) {
+    spawnLogic(room, "legless");
   } else if (
     scoutHarvesters.length < maxScoutHarvesters &&
     energyAvailable > 800
@@ -395,6 +470,12 @@ module.exports.loop = function () {
     }
     if (creep.memory.role == "kamikaze") {
       roleKamikaze.run(creep);
+    }
+    if (creep.memory.role == "linker") {
+      roleLinker.run(creep);
+    }
+    if (creep.memory.role == "legless") {
+      roleLegless.run(creep);
     }
   }
 };

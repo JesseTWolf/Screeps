@@ -18,8 +18,37 @@ var roleBuilder = {
             visualizePathStyle: { stroke: "#ffffff" },
           });
         }
+      } else {
+        const closestDamagedStructure = creep.pos.findClosestByRange(
+          FIND_STRUCTURES,
+          {
+            filter: (structure) =>
+              (structure.hits < structure.hitsMax &&
+                structure.structureType != STRUCTURE_WALL) ||
+              (structure.structureType == STRUCTURE_WALL &&
+                structure.hits == 1),
+          }
+        );
+        if (closestDamagedStructure) {
+          if (creep.repair(closestDamagedStructure) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(closestDamagedStructure);
+          }
+        } else if (
+          creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE
+        ) {
+          creep.moveTo(creep.room.controller, {
+            visualizePathStyle: { stroke: "#ffffff" },
+          });
+        }
       }
     } else {
+      var storages = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: (s) =>
+          (s.structureType == STRUCTURE_STORAGE ||
+            s.structureType == STRUCTURE_LINK) &&
+          s.store[RESOURCE_ENERGY] > 0,
+      });
+
       var containers = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (s) =>
           s.structureType == STRUCTURE_CONTAINER &&
@@ -28,7 +57,13 @@ var roleBuilder = {
       const droppedResources = creep.pos.findClosestByRange(
         FIND_DROPPED_RESOURCES
       );
-      if (droppedResources.length != 0) {
+
+      if (
+        storages &&
+        creep.withdraw(storages, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
+      ) {
+        creep.moveTo(storages);
+      } else if (droppedResources) {
         if (creep.pickup(droppedResources) == ERR_NOT_IN_RANGE) {
           creep.moveTo(droppedResources);
         }

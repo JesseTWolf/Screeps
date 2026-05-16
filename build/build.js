@@ -6,7 +6,7 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 const root = path.resolve(__dirname, "..");
-const inputFile = process.argv[2] || "screeps.go";
+const inputFile = process.argv[2] || ".";
 const outputFile = process.argv[3] || "main.js";
 const preludePath = path.join(__dirname, "screeps-prelude.js");
 const generatedFile = "main.generated.js";

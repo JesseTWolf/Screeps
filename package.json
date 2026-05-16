@@ -4,6 +4,6 @@
   "private": true,
   "scripts": {
     "build": "node build/build.js",
-    "build:go": "node build/build.js screeps.go main.js"
+    "build:go": "node build/build.js . main.js"
   }
 }

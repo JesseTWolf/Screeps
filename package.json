@@ -1,0 +1,9 @@
+{
+  "name": "screeps-gopherjs-build",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build/build.js",
+    "build:go": "node build/build.js screeps.go main.js"
+  }
+}

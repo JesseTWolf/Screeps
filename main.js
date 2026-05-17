@@ -2418,7 +2418,7 @@ var $isASCII = (s) => {
 };
 
 $packages["github.com/gopherjs/gopherjs/js"] = (function() {
-	var $pkg = {}, $init, Object, Error, M, sliceType, sliceType$1, ptrType, ptrType$1, Keys, init;
+	var $pkg = {}, $init, Object, Error, sliceType, sliceType$1, ptrType, ptrType$1, Keys, init;
 	Object = $newType(0, $kindStruct, "js.Object", true, "github.com/gopherjs/gopherjs/js", true, function(object_) {
 		this.$val = this;
 		if (arguments.length === 0) {
@@ -2435,10 +2435,8 @@ $packages["github.com/gopherjs/gopherjs/js"] = (function() {
 		}
 		this.Object = Object_;
 	});
-	M = $newType(4, $kindMap, "js.M", true, "github.com/gopherjs/gopherjs/js", true, null);
 	$pkg.Object = Object;
 	$pkg.Error = Error;
-	$pkg.M = M;
 	$pkg.$finishSetup = function() {
 		sliceType = $sliceType($emptyInterface);
 		sliceType$1 = $sliceType($String);
@@ -2564,7 +2562,6 @@ $packages["github.com/gopherjs/gopherjs/js"] = (function() {
 		ptrType$1.methods = [{prop: "Error", name: "Error", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Stack", name: "Stack", pkg: "", typ: $funcType([], [$String], false)}];
 		Object.init("github.com/gopherjs/gopherjs/js", [{prop: "object", name: "object", embedded: false, exported: false, typ: ptrType, tag: ""}]);
 		Error.init("", [{prop: "Object", name: "Object", embedded: true, exported: true, typ: ptrType, tag: ""}]);
-		M.init($String, $emptyInterface);
 	};
 	$init = function() {
 		$pkg.$init = function() {};
@@ -2688,64 +2685,114 @@ $packages["runtime"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, js, sliceType, ptrType, funcType, upgrader, main, harvester;
+	var $pkg = {}, $init, js, sliceType, sliceType$1, mapType, upgrader, main, harvester;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	$pkg.$finishSetup = function() {
-		sliceType = $sliceType($emptyInterface);
-		ptrType = $ptrType(js.Object);
-		funcType = $funcType([ptrType], [$Bool], false);
+		sliceType = $sliceType($String);
+		sliceType$1 = $sliceType($emptyInterface);
+		mapType = $mapType($String, $emptyInterface);
 		upgrader = function upgrader$1(creep) {
-			var controller, creep, source;
-			if (($parseInt(creep.store.freeCapacity) >> 0) > 0) {
-				source = creep.pos().findClosestByPath($global.Game.sources);
-				if (($parseInt(creep.harvest(source)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
-					creep.moveTo(source);
+			var creep, sources, upgradeController;
+			if (!!(creep.memory.upgrading) && (($parseInt(creep.store.getUsedCapacity()) >> 0) === 0)) {
+				creep.memory.upgrading = $externalize(false, $Bool);
+				$global.console.log($externalize("Switching to harvesting", $String));
+			}
+			if (!!!(creep.memory.upgrading) && (($parseInt(creep.store.getFreeCapacity()) >> 0) === 0)) {
+				creep.memory.upgrading = $externalize(true, $Bool);
+				$global.console.log($externalize("Switching to upgrading", $String));
+			}
+			if (!!(creep.memory.upgrading)) {
+				upgradeController = creep.room.controller;
+				if (($parseInt(creep.upgradeController(upgradeController)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
+					creep.moveTo(upgradeController);
 				}
-			} else {
-				controller = creep.pos().findClosestByPath($global.Game.controllers);
-				if (!(controller === null)) {
-					if (($parseInt(creep.upgradeController(controller)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
-						creep.moveTo(controller);
-					}
+			} else if (!!(creep.memory.upgrading) === false) {
+				sources = creep.room.find($global.FIND_SOURCES);
+				if (($parseInt(creep.harvest(sources[0])) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
+					creep.moveTo(sources[0]);
 				}
 			}
 		};
 		main = function main$1() {
-			var _i, _ref, bodyParts, creep, name, result;
-			bodyParts = new sliceType([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
-			result = $global.Game.spawns.Wolf_1.spawnCreep($externalize(bodyParts, sliceType), $externalize("Harvester1", $String));
-			$global.console.log($externalize("Result: ", $String), result);
-			_ref = js.Keys($global.Game.creeps);
+			var _i, _i$1, _i$2, _i$3, _ref, _ref$1, _ref$2, _ref$3, bodyParts, bodyParts$1, creep, creep$1, creep$2, creeps, harversters, memoryCreeps, name, name$1, name$2, name$3, newName, newName$1, spawningCreep, upgraders;
+			memoryCreeps = $global.Memory.creeps;
+			_ref = js.Keys(memoryCreeps);
 			_i = 0;
 			while (true) {
 				if (!(_i < _ref.$length)) { break; }
 				name = ((_i < 0 || _i >= _ref.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref.$array[_ref.$offset + _i]);
-				creep = $global.Game.creeps[$externalize(name, $String)];
-				if ($internalize(creep.memory.role, $String) === "harvester") {
-					harvester(creep);
-				}
-				if ($internalize(creep.memory.role, $String) === "upgrader") {
-					upgrader(creep);
+				if (!!!($global.Game.creeps[$externalize(name, $String)])) {
+					$global.console.log($externalize("Clearing non-existing creep memory:", $String), $externalize(name, $String));
+					$global.Reflect.deleteProperty(memoryCreeps, $externalize(name, $String));
 				}
 				_i++;
 			}
+			creeps = $global.Game.creeps;
+			harversters = new sliceType([]);
+			_ref$1 = js.Keys(creeps);
+			_i$1 = 0;
+			while (true) {
+				if (!(_i$1 < _ref$1.$length)) { break; }
+				name$1 = ((_i$1 < 0 || _i$1 >= _ref$1.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$1.$array[_ref$1.$offset + _i$1]);
+				creep = creeps[$externalize(name$1, $String)];
+				if ($internalize(creep.memory.role, $String) === "harvester") {
+					harversters = $append(harversters, name$1);
+				}
+				_i$1++;
+			}
+			upgraders = new sliceType([]);
+			_ref$2 = js.Keys(creeps);
+			_i$2 = 0;
+			while (true) {
+				if (!(_i$2 < _ref$2.$length)) { break; }
+				name$2 = ((_i$2 < 0 || _i$2 >= _ref$2.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$2.$array[_ref$2.$offset + _i$2]);
+				creep$1 = creeps[$externalize(name$2, $String)];
+				if ($internalize(creep$1.memory.role, $String) === "upgrader") {
+					upgraders = $append(upgraders, name$2);
+				}
+				_i$2++;
+			}
+			if (harversters.$length < 2) {
+				newName = "Harvester" + $internalize($global.Game.time, $String);
+				bodyParts = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
+				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts, sliceType$1), $externalize(newName, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("harvester") }])) }]), mapType));
+			}
+			if (upgraders.$length < 2) {
+				newName$1 = "Upgrader" + $internalize($global.Game.time, $String);
+				bodyParts$1 = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
+				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts$1, sliceType$1), $externalize(newName$1, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("upgrader") }])) }]), mapType));
+			}
+			if (!!($global.Game.spawns.Wolf1.spawning)) {
+				spawningCreep = $global.Game.creeps[$externalize($internalize($global.Game.spawns.Wolf1.spawning.name, $String), $String)];
+				$global.Game.spawns.Wolf1.room.visual.text($externalize("\xF0\x9F\x9B\xA0\xEF\xB8\x8F " + $internalize(spawningCreep.memory.role, $String), $String), $parseInt($global.Game.spawns.Wolf1.pos.x) >> 0, $parseInt($global.Game.spawns.Wolf1.pos.y) >> 0, $externalize($makeMap($String.keyFor, [{ k: "align", v: new $String("left") }, { k: "opacity", v: new $Float64(0.8) }]), mapType));
+			}
+			_ref$3 = js.Keys($global.Game.creeps);
+			_i$3 = 0;
+			while (true) {
+				if (!(_i$3 < _ref$3.$length)) { break; }
+				name$3 = ((_i$3 < 0 || _i$3 >= _ref$3.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$3.$array[_ref$3.$offset + _i$3]);
+				creep$2 = $global.Game.creeps[$externalize(name$3, $String)];
+				if ($internalize(creep$2.memory.role, $String) === "harvester") {
+					harvester(creep$2);
+				}
+				if ($internalize(creep$2.memory.role, $String) === "upgrader") {
+					upgrader(creep$2);
+				}
+				_i$3++;
+			}
 		};
 		harvester = function harvester$1(creep) {
-			var creep, source, target;
-			if (($parseInt(creep.store.freeCapacity) >> 0) > 0) {
-				source = creep.pos().findClosestByPath($global.Game.sources);
-				if (($parseInt(creep.harvest(source)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
-					creep.moveTo(source);
+			var creep, creepCapacity, sources, spawner;
+			creepCapacity = $parseInt(creep.store.getFreeCapacity()) >> 0;
+			if (creepCapacity > 0) {
+				sources = creep.room.find($global.FIND_SOURCES);
+				if (($parseInt(creep.harvest(sources[0])) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
+					creep.moveTo(sources[0]);
 				}
 			} else {
-				target = creep.pos().findClosestByPath($global.Game.structures, $externalize($makeMap($String.keyFor, [{ k: "filter", v: new funcType((function harvester·func1(structure) {
-						var structure;
-						return $internalize(structure.structureType, $String) === "extension" && ($parseInt(structure.store.freeCapacity) >> 0) > 0;
-					})) }]), js.M));
-				if (!(target === null)) {
-					if (($parseInt(creep.transfer(target, $global.RESOURCE_ENERGY)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
-						creep.moveTo(target);
-					}
+				spawner = $global.Game.spawns.Wolf1;
+				if (($parseInt(creep.transfer(spawner, $global.RESOURCE_ENERGY)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
+					creep.moveTo(spawner);
 				}
 			}
 		};

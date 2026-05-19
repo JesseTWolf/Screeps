@@ -5,11 +5,11 @@ import "github.com/gopherjs/gopherjs/js"
 func upgrader(creep *js.Object) {
 	if creep.Get("memory").Get("upgrading").Bool() && creep.Get("store").Call("getUsedCapacity").Int() == 0 {
 		creep.Get("memory").Set("upgrading", false)
-		js.Global.Get("console").Call("log", "Switching to harvesting")
+		creep.Call("say", "Harvesting")
 	}
 	if !creep.Get("memory").Get("upgrading").Bool() && creep.Get("store").Call("getFreeCapacity").Int() == 0 {
 		creep.Get("memory").Set("upgrading", true)
-		js.Global.Get("console").Call("log", "Switching to upgrading")
+		creep.Call("say", "Upgrading")
 	}
 
 	if creep.Get("memory").Get("upgrading").Bool() {

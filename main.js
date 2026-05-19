@@ -2685,7 +2685,7 @@ $packages["runtime"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, js, sliceType, sliceType$1, mapType, upgrader, main, harvester;
+	var $pkg = {}, $init, js, sliceType, sliceType$1, mapType, upgrader, main, harvester, builder;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	$pkg.$finishSetup = function() {
 		sliceType = $sliceType($String);
@@ -2695,11 +2695,11 @@ $packages["main"] = (function() {
 			var creep, sources, upgradeController;
 			if (!!(creep.memory.upgrading) && (($parseInt(creep.store.getUsedCapacity()) >> 0) === 0)) {
 				creep.memory.upgrading = $externalize(false, $Bool);
-				$global.console.log($externalize("Switching to harvesting", $String));
+				creep.say($externalize("Harvesting", $String));
 			}
 			if (!!!(creep.memory.upgrading) && (($parseInt(creep.store.getFreeCapacity()) >> 0) === 0)) {
 				creep.memory.upgrading = $externalize(true, $Bool);
-				$global.console.log($externalize("Switching to upgrading", $String));
+				creep.say($externalize("Upgrading", $String));
 			}
 			if (!!(creep.memory.upgrading)) {
 				upgradeController = creep.room.controller;
@@ -2714,7 +2714,7 @@ $packages["main"] = (function() {
 			}
 		};
 		main = function main$1() {
-			var _i, _i$1, _i$2, _i$3, _ref, _ref$1, _ref$2, _ref$3, bodyParts, bodyParts$1, creep, creep$1, creep$2, creeps, harversters, memoryCreeps, name, name$1, name$2, name$3, newName, newName$1, spawningCreep, upgraders;
+			var _i, _i$1, _i$2, _i$3, _i$4, _ref, _ref$1, _ref$2, _ref$3, _ref$4, bodyParts, bodyParts$1, bodyParts$2, builders, creep, creep$1, creep$2, creep$3, creeps, harversters, memoryCreeps, name, name$1, name$2, name$3, name$4, newName, newName$1, newName$2, spawningCreep, upgraders;
 			memoryCreeps = $global.Memory.creeps;
 			_ref = js.Keys(memoryCreeps);
 			_i = 0;
@@ -2728,57 +2728,77 @@ $packages["main"] = (function() {
 				_i++;
 			}
 			creeps = $global.Game.creeps;
-			harversters = new sliceType([]);
+			builders = new sliceType([]);
 			_ref$1 = js.Keys(creeps);
 			_i$1 = 0;
 			while (true) {
 				if (!(_i$1 < _ref$1.$length)) { break; }
 				name$1 = ((_i$1 < 0 || _i$1 >= _ref$1.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$1.$array[_ref$1.$offset + _i$1]);
 				creep = creeps[$externalize(name$1, $String)];
-				if ($internalize(creep.memory.role, $String) === "harvester") {
-					harversters = $append(harversters, name$1);
+				if ($internalize(creep.memory.role, $String) === "builder") {
+					builders = $append(builders, name$1);
 				}
 				_i$1++;
 			}
-			upgraders = new sliceType([]);
+			harversters = new sliceType([]);
 			_ref$2 = js.Keys(creeps);
 			_i$2 = 0;
 			while (true) {
 				if (!(_i$2 < _ref$2.$length)) { break; }
 				name$2 = ((_i$2 < 0 || _i$2 >= _ref$2.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$2.$array[_ref$2.$offset + _i$2]);
 				creep$1 = creeps[$externalize(name$2, $String)];
-				if ($internalize(creep$1.memory.role, $String) === "upgrader") {
-					upgraders = $append(upgraders, name$2);
+				if ($internalize(creep$1.memory.role, $String) === "harvester") {
+					harversters = $append(harversters, name$2);
 				}
 				_i$2++;
 			}
-			if (harversters.$length < 2) {
-				newName = "Harvester" + $internalize($global.Game.time, $String);
+			upgraders = new sliceType([]);
+			_ref$3 = js.Keys(creeps);
+			_i$3 = 0;
+			while (true) {
+				if (!(_i$3 < _ref$3.$length)) { break; }
+				name$3 = ((_i$3 < 0 || _i$3 >= _ref$3.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$3.$array[_ref$3.$offset + _i$3]);
+				creep$2 = creeps[$externalize(name$3, $String)];
+				if ($internalize(creep$2.memory.role, $String) === "upgrader") {
+					upgraders = $append(upgraders, name$3);
+				}
+				_i$3++;
+			}
+			if (builders.$length < 2) {
+				newName = "Builder" + $internalize($global.Game.time, $String);
 				bodyParts = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
-				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts, sliceType$1), $externalize(newName, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("harvester") }])) }]), mapType));
+				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts, sliceType$1), $externalize(newName, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("builder") }])) }]), mapType));
+			}
+			if (harversters.$length < 2) {
+				newName$1 = "Harvester" + $internalize($global.Game.time, $String);
+				bodyParts$1 = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
+				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts$1, sliceType$1), $externalize(newName$1, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("harvester") }])) }]), mapType));
 			}
 			if (upgraders.$length < 2) {
-				newName$1 = "Upgrader" + $internalize($global.Game.time, $String);
-				bodyParts$1 = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
-				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts$1, sliceType$1), $externalize(newName$1, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("upgrader") }])) }]), mapType));
+				newName$2 = "Upgrader" + $internalize($global.Game.time, $String);
+				bodyParts$2 = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
+				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts$2, sliceType$1), $externalize(newName$2, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("upgrader") }])) }]), mapType));
 			}
 			if (!!($global.Game.spawns.Wolf1.spawning)) {
 				spawningCreep = $global.Game.creeps[$externalize($internalize($global.Game.spawns.Wolf1.spawning.name, $String), $String)];
 				$global.Game.spawns.Wolf1.room.visual.text($externalize("\xF0\x9F\x9B\xA0\xEF\xB8\x8F " + $internalize(spawningCreep.memory.role, $String), $String), $parseInt($global.Game.spawns.Wolf1.pos.x) >> 0, $parseInt($global.Game.spawns.Wolf1.pos.y) >> 0, $externalize($makeMap($String.keyFor, [{ k: "align", v: new $String("left") }, { k: "opacity", v: new $Float64(0.8) }]), mapType));
 			}
-			_ref$3 = js.Keys($global.Game.creeps);
-			_i$3 = 0;
+			_ref$4 = js.Keys($global.Game.creeps);
+			_i$4 = 0;
 			while (true) {
-				if (!(_i$3 < _ref$3.$length)) { break; }
-				name$3 = ((_i$3 < 0 || _i$3 >= _ref$3.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$3.$array[_ref$3.$offset + _i$3]);
-				creep$2 = $global.Game.creeps[$externalize(name$3, $String)];
-				if ($internalize(creep$2.memory.role, $String) === "harvester") {
-					harvester(creep$2);
+				if (!(_i$4 < _ref$4.$length)) { break; }
+				name$4 = ((_i$4 < 0 || _i$4 >= _ref$4.$length) ? ($throwRuntimeError("index out of range"), undefined) : _ref$4.$array[_ref$4.$offset + _i$4]);
+				creep$3 = $global.Game.creeps[$externalize(name$4, $String)];
+				if ($internalize(creep$3.memory.role, $String) === "builder") {
+					builder(creep$3);
 				}
-				if ($internalize(creep$2.memory.role, $String) === "upgrader") {
-					upgrader(creep$2);
+				if ($internalize(creep$3.memory.role, $String) === "harvester") {
+					harvester(creep$3);
 				}
-				_i$3++;
+				if ($internalize(creep$3.memory.role, $String) === "upgrader") {
+					upgrader(creep$3);
+				}
+				_i$4++;
 			}
 		};
 		harvester = function harvester$1(creep) {
@@ -2793,6 +2813,30 @@ $packages["main"] = (function() {
 				spawner = $global.Game.spawns.Wolf1;
 				if (($parseInt(creep.transfer(spawner, $global.RESOURCE_ENERGY)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
 					creep.moveTo(spawner);
+				}
+			}
+		};
+		builder = function builder$1(creep) {
+			var creep, sources, targets;
+			if (!!(creep.memory.building) && (($parseInt(creep.store.getUsedCapacity()) >> 0) === 0)) {
+				creep.memory.building = $externalize(false, $Bool);
+				creep.say($externalize("Harvesting", $String));
+			}
+			if (!!!(creep.memory.building) && (($parseInt(creep.store.getFreeCapacity()) >> 0) === 0)) {
+				creep.memory.building = $externalize(true, $Bool);
+				creep.say($externalize("Building", $String));
+			}
+			if (!!(creep.memory.building)) {
+				targets = creep.room.find($global.FIND_CONSTRUCTION_SITES);
+				if ($parseInt(targets.length) > 0) {
+					if (($parseInt(creep.build(targets[0])) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
+						creep.moveTo(targets[0]);
+					}
+				}
+			} else if (!!(creep.memory.building) === false) {
+				sources = creep.room.find($global.FIND_SOURCES);
+				if (($parseInt(creep.harvest(sources[0])) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
+					creep.moveTo(sources[0]);
 				}
 			}
 		};

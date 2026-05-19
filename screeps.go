@@ -17,6 +17,15 @@ func main() {
 	}
 
 	creeps := js.Global.Get("Game").Get("creeps")
+
+	builders := []string{}
+	for _, name := range js.Keys(creeps) {
+		creep := creeps.Get(name)
+
+		if creep.Get("memory").Get("role").String() == "builder" {
+			builders = append(builders, name)
+		}
+	}
 	
 	harversters := []string{}
 	for _, name := range js.Keys(creeps) {
@@ -38,6 +47,20 @@ func main() {
 
 	// js.Global.Get("console").Call("log", "Harvesters: ", harversters)
 	// js.Global.Get("console").Call("log", "Upgraders: ", upgraders)
+
+	if (len(builders) < 2) {
+		newName := "Builder" + js.Global.Get("Game").Get("time").String()
+		bodyParts := []interface{}{
+			js.Global.Get("WORK"),
+			js.Global.Get("CARRY"),
+			js.Global.Get("MOVE"),
+		}
+		js.Global.Get("Game").Get("spawns").Get("Wolf1").Call("spawnCreep", bodyParts, newName, map[string]interface{}{
+			"memory": map[string]interface{}{
+				"role": "builder",
+			},
+		})
+	}
 
 	if (len(harversters) < 2) {
 		newName := "Harvester" + js.Global.Get("Game").Get("time").String()
@@ -77,6 +100,9 @@ func main() {
 
 	for _, name := range js.Keys(js.Global.Get("Game").Get("creeps")) {
 		creep := js.Global.Get("Game").Get("creeps").Get(name)
+		if creep.Get("memory").Get("role").String() == "builder" {
+			builder(creep)
+		}
 		if creep.Get("memory").Get("role").String() == "harvester" {
 			harvester(creep)
 		}

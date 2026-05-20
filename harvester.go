@@ -11,9 +11,15 @@ func harvester(creep *js.Object) {
 			creep.Call("moveTo", sources.Index(0))
 		}
 	} else {
-		spawner := js.Global.Get("Game").Get("spawns").Get("Wolf1")
-		if creep.Call("transfer", spawner, js.Global.Get("RESOURCE_ENERGY")).Int() == js.Global.Get("ERR_NOT_IN_RANGE").Int() {
-			creep.Call("moveTo", spawner)
+		targets := creep.Get("room").Call("find", js.Global.Get("FIND_STRUCTURES"), js.M{"filter": func(structure *js.Object) bool {
+			structureType := structure.Get("structureType").String()
+			return (structureType == js.Global.Get("STRUCTURE_EXTENSION").String() || structureType == js.Global.Get("STRUCTURE_SPAWN").String()) && structure.Get("store").Call("getFreeCapacity", js.Global.Get("RESOURCE_ENERGY")).Int() > 0
+		}})
+
+		if targets.Length() > 0 {
+			if creep.Call("transfer", targets.Index(0), js.Global.Get("RESOURCE_ENERGY")).Int() == js.Global.Get("ERR_NOT_IN_RANGE").Int() {
+				creep.Call("moveTo", targets.Index(0))
+			}
 		}
 	}
 }

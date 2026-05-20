@@ -2418,7 +2418,7 @@ var $isASCII = (s) => {
 };
 
 $packages["github.com/gopherjs/gopherjs/js"] = (function() {
-	var $pkg = {}, $init, Object, Error, sliceType, sliceType$1, ptrType, ptrType$1, Keys, init;
+	var $pkg = {}, $init, Object, Error, M, sliceType, sliceType$1, ptrType, ptrType$1, Keys, init;
 	Object = $newType(0, $kindStruct, "js.Object", true, "github.com/gopherjs/gopherjs/js", true, function(object_) {
 		this.$val = this;
 		if (arguments.length === 0) {
@@ -2435,8 +2435,10 @@ $packages["github.com/gopherjs/gopherjs/js"] = (function() {
 		}
 		this.Object = Object_;
 	});
+	M = $newType(4, $kindMap, "js.M", true, "github.com/gopherjs/gopherjs/js", true, null);
 	$pkg.Object = Object;
 	$pkg.Error = Error;
+	$pkg.M = M;
 	$pkg.$finishSetup = function() {
 		sliceType = $sliceType($emptyInterface);
 		sliceType$1 = $sliceType($String);
@@ -2562,6 +2564,7 @@ $packages["github.com/gopherjs/gopherjs/js"] = (function() {
 		ptrType$1.methods = [{prop: "Error", name: "Error", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Stack", name: "Stack", pkg: "", typ: $funcType([], [$String], false)}];
 		Object.init("github.com/gopherjs/gopherjs/js", [{prop: "object", name: "object", embedded: false, exported: false, typ: ptrType, tag: ""}]);
 		Error.init("", [{prop: "Object", name: "Object", embedded: true, exported: true, typ: ptrType, tag: ""}]);
+		M.init($String, $emptyInterface);
 	};
 	$init = function() {
 		$pkg.$init = function() {};
@@ -2685,12 +2688,14 @@ $packages["runtime"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, js, sliceType, sliceType$1, mapType, upgrader, main, harvester, builder;
+	var $pkg = {}, $init, js, sliceType, sliceType$1, mapType, ptrType, funcType, upgrader, main, harvester, builder;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	$pkg.$finishSetup = function() {
 		sliceType = $sliceType($String);
 		sliceType$1 = $sliceType($emptyInterface);
 		mapType = $mapType($String, $emptyInterface);
+		ptrType = $ptrType(js.Object);
+		funcType = $funcType([ptrType], [$Bool], false);
 		upgrader = function upgrader$1(creep) {
 			var creep, sources, upgradeController;
 			if (!!(creep.memory.upgrading) && (($parseInt(creep.store.getUsedCapacity()) >> 0) === 0)) {
@@ -2802,7 +2807,7 @@ $packages["main"] = (function() {
 			}
 		};
 		harvester = function harvester$1(creep) {
-			var creep, creepCapacity, sources, spawner;
+			var creep, creepCapacity, sources, targets;
 			creepCapacity = $parseInt(creep.store.getFreeCapacity()) >> 0;
 			if (creepCapacity > 0) {
 				sources = creep.room.find($global.FIND_SOURCES);
@@ -2810,9 +2815,15 @@ $packages["main"] = (function() {
 					creep.moveTo(sources[0]);
 				}
 			} else {
-				spawner = $global.Game.spawns.Wolf1;
-				if (($parseInt(creep.transfer(spawner, $global.RESOURCE_ENERGY)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
-					creep.moveTo(spawner);
+				targets = creep.room.find($global.FIND_STRUCTURES, $externalize($makeMap($String.keyFor, [{ k: "filter", v: new funcType((function harvester·func1(structure) {
+						var structure, structureType;
+						structureType = $internalize(structure.structureType, $String);
+						return (structureType === $internalize($global.STRUCTURE_EXTENSION, $String) || structureType === $internalize($global.STRUCTURE_SPAWN, $String)) && ($parseInt(structure.store.getFreeCapacity($global.RESOURCE_ENERGY)) >> 0) > 0;
+					})) }]), js.M));
+				if ($parseInt(targets.length) > 0) {
+					if (($parseInt(creep.transfer(targets[0], $global.RESOURCE_ENERGY)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {
+						creep.moveTo(targets[0]);
+					}
 				}
 			}
 		};

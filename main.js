@@ -2688,14 +2688,14 @@ $packages["runtime"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, js, sliceType, sliceType$1, mapType, ptrType, funcType, upgrader, main, harvester, builder;
+	var $pkg = {}, $init, js, ptrType, funcType, sliceType, sliceType$1, mapType, upgrader, main, harvester, builder;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	$pkg.$finishSetup = function() {
+		ptrType = $ptrType(js.Object);
+		funcType = $funcType([ptrType], [$Bool], false);
 		sliceType = $sliceType($String);
 		sliceType$1 = $sliceType($emptyInterface);
 		mapType = $mapType($String, $emptyInterface);
-		ptrType = $ptrType(js.Object);
-		funcType = $funcType([ptrType], [$Bool], false);
 		upgrader = function upgrader$1(creep) {
 			var creep, sources, upgradeController;
 			if (!!(creep.memory.upgrading) && (($parseInt(creep.store.getUsedCapacity()) >> 0) === 0)) {
@@ -2719,7 +2719,7 @@ $packages["main"] = (function() {
 			}
 		};
 		main = function main$1() {
-			var _i, _i$1, _i$2, _i$3, _i$4, _ref, _ref$1, _ref$2, _ref$3, _ref$4, bodyParts, bodyParts$1, bodyParts$2, builders, creep, creep$1, creep$2, creep$3, creeps, harversters, memoryCreeps, name, name$1, name$2, name$3, name$4, newName, newName$1, newName$2, spawningCreep, upgraders;
+			var _i, _i$1, _i$2, _i$3, _i$4, _ref, _ref$1, _ref$2, _ref$3, _ref$4, bodyParts, bodyParts$1, bodyParts$2, builders, closestDamagedStructure, closestHostile, creep, creep$1, creep$2, creep$3, creeps, harversters, memoryCreeps, name, name$1, name$2, name$3, name$4, newName, newName$1, newName$2, spawningCreep, tower, upgraders;
 			memoryCreeps = $global.Memory.creeps;
 			_ref = js.Keys(memoryCreeps);
 			_i = 0;
@@ -2731,6 +2731,20 @@ $packages["main"] = (function() {
 					$global.Reflect.deleteProperty(memoryCreeps, $externalize(name, $String));
 				}
 				_i++;
+			}
+			tower = $global.Game.getObjectById($externalize("6a0e2aa0a4c4e6002c159aa8", $String));
+			if (!!(tower)) {
+				closestHostile = tower.pos.findClosestByRange($global.FIND_HOSTILE_CREEPS);
+				if (!!(closestHostile)) {
+					tower.attack(closestHostile);
+				}
+				closestDamagedStructure = tower.pos.findClosestByRange($global.FIND_STRUCTURES, $externalize($makeMap($String.keyFor, [{ k: "filter", v: new funcType((function main·func1(structure) {
+						var structure;
+						return ($parseInt(structure.hits) >> 0) < ($parseInt(structure.hitsMax) >> 0);
+					})) }]), js.M));
+				if (!!(closestDamagedStructure)) {
+					tower.repair(closestDamagedStructure);
+				}
 			}
 			creeps = $global.Game.creeps;
 			builders = new sliceType([]);
@@ -2774,12 +2788,12 @@ $packages["main"] = (function() {
 				bodyParts = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
 				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts, sliceType$1), $externalize(newName, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("builder") }])) }]), mapType));
 			}
-			if (harversters.$length < 2) {
+			if (harversters.$length < 3) {
 				newName$1 = "Harvester" + $internalize($global.Game.time, $String);
 				bodyParts$1 = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
 				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts$1, sliceType$1), $externalize(newName$1, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("harvester") }])) }]), mapType));
 			}
-			if (upgraders.$length < 2) {
+			if (upgraders.$length < 3) {
 				newName$2 = "Upgrader" + $internalize($global.Game.time, $String);
 				bodyParts$2 = new sliceType$1([new $jsObjectPtr($global.WORK), new $jsObjectPtr($global.CARRY), new $jsObjectPtr($global.MOVE)]);
 				$global.Game.spawns.Wolf1.spawnCreep($externalize(bodyParts$2, sliceType$1), $externalize(newName$2, $String), $externalize($makeMap($String.keyFor, [{ k: "memory", v: new mapType($makeMap($String.keyFor, [{ k: "role", v: new $String("upgrader") }])) }]), mapType));
@@ -2818,7 +2832,7 @@ $packages["main"] = (function() {
 				targets = creep.room.find($global.FIND_STRUCTURES, $externalize($makeMap($String.keyFor, [{ k: "filter", v: new funcType((function harvester·func1(structure) {
 						var structure, structureType;
 						structureType = $internalize(structure.structureType, $String);
-						return (structureType === $internalize($global.STRUCTURE_EXTENSION, $String) || structureType === $internalize($global.STRUCTURE_SPAWN, $String)) && ($parseInt(structure.store.getFreeCapacity($global.RESOURCE_ENERGY)) >> 0) > 0;
+						return (structureType === $internalize($global.STRUCTURE_EXTENSION, $String) || structureType === $internalize($global.STRUCTURE_SPAWN, $String) || structureType === $internalize($global.STRUCTURE_TOWER, $String)) && ($parseInt(structure.store.getFreeCapacity($global.RESOURCE_ENERGY)) >> 0) > 0;
 					})) }]), js.M));
 				if ($parseInt(targets.length) > 0) {
 					if (($parseInt(creep.transfer(targets[0], $global.RESOURCE_ENERGY)) >> 0) === ($parseInt($global.ERR_NOT_IN_RANGE) >> 0)) {

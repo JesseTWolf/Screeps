@@ -16,6 +16,22 @@ func main() {
 		}
 	}
 
+	// Hard coding tower id for now, will update later.
+	tower := js.Global.Get("Game").Call("getObjectById", "6a0e2aa0a4c4e6002c159aa8")
+	if tower.Bool() {
+		closestHostile := tower.Get("pos").Call("findClosestByRange", js.Global.Get("FIND_HOSTILE_CREEPS"))
+		if closestHostile.Bool() {
+			tower.Call("attack", closestHostile)
+		}
+
+		closestDamagedStructure := tower.Get("pos").Call("findClosestByRange", js.Global.Get("FIND_STRUCTURES"), js.M{"filter": func(structure *js.Object) bool {
+			return structure.Get("hits").Int() < structure.Get("hitsMax").Int()
+		}})
+		if closestDamagedStructure.Bool() {
+			tower.Call("repair", closestDamagedStructure)
+		}
+	}
+
 	creeps := js.Global.Get("Game").Get("creeps")
 
 	builders := []string{}
@@ -62,7 +78,7 @@ func main() {
 		})
 	}
 
-	if (len(harversters) < 2) {
+	if (len(harversters) < 3) {
 		newName := "Harvester" + js.Global.Get("Game").Get("time").String()
 		bodyParts := []interface{}{
 			js.Global.Get("WORK"),
@@ -76,7 +92,7 @@ func main() {
 		})
 	}
 
-	if (len(upgraders) < 2) {
+	if (len(upgraders) < 3) {
 		newName := "Upgrader" + js.Global.Get("Game").Get("time").String()
 		bodyParts := []interface{}{
 			js.Global.Get("WORK"),

@@ -13,7 +13,7 @@ func harvester(creep *js.Object) {
 	} else {
 		targets := creep.Get("room").Call("find", js.Global.Get("FIND_STRUCTURES"), js.M{"filter": func(structure *js.Object) bool {
 			structureType := structure.Get("structureType").String()
-			return (structureType == js.Global.Get("STRUCTURE_EXTENSION").String() || structureType == js.Global.Get("STRUCTURE_SPAWN").String()) && structure.Get("store").Call("getFreeCapacity", js.Global.Get("RESOURCE_ENERGY")).Int() > 0
+			return (structureType == js.Global.Get("STRUCTURE_EXTENSION").String() || structureType == js.Global.Get("STRUCTURE_SPAWN").String() || structureType == js.Global.Get("STRUCTURE_TOWER").String()) && structure.Get("store").Call("getFreeCapacity", js.Global.Get("RESOURCE_ENERGY")).Int() > 0
 		}})
 
 		if targets.Length() > 0 {
